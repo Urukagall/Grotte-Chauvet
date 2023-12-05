@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+///------------------------------------------------------------------------------
 import {
   publicToken,
   mainSceneUUID,
@@ -6,20 +6,24 @@ import {
 } from "./config.js";
 
 //------------------------------------------------------------------------------
-window.addEventListener("load", InitApp);
+window.addEventListener("load", () => {
+  const canvas = document.getElementById("display-canvas");
+  InitApp(canvas);
+});
 
 //------------------------------------------------------------------------------
-async function InitApp() {
+async function InitApp(canvas) {
   await SDK3DVerse.joinOrStartSession({
     userToken: publicToken,
     sceneUUID: mainSceneUUID,
-    canvas: document.getElementById("display-canvas"),
+    canvas: canvas,
     createDefaultCamera: false,
     startSimulation: "on-assets-loaded",
   });
-
+  
   await InitFirstPersonController(characterControllerSceneUUID);
-  canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
+  window.addEventListener("keydown", checkKeyPressed);
+  //canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
 }
 
 //------------------------------------------------------------------------------
@@ -67,7 +71,6 @@ async function InitFirstPersonController(charCtlSceneUUID) {
 
 //------------------------------------------------------------------------------
 async function setFPSCameraController(canvas){
-  console.log("a");
   // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
   // LOOK_DOWN actions.
   SDK3DVerse.actionMap.values["LOOK_LEFT"][0] = ["MOUSE_AXIS_X_POS"];
@@ -84,3 +87,53 @@ async function setFPSCameraController(canvas){
   );
   canvas.requestPointerLock();
 };
+
+async function onClick(event) {
+  const target = await SDK3DVerse.engineAPI.castScreenSpaceRay(
+    event.clientX,
+    event.clientY
+  );
+  if (!target.pickedPosition) return;
+  const clickedEntity = target.entity;
+}
+
+async function checkKeyPressed(event){
+  if(event.key== "r"){
+    detection();
+  }
+  if(event.key== "f"){
+    changeStateTorch();
+  }
+}
+
+async function changeStateTorch(){
+  const torch = await SDK3DVerse.engineAPI.findEntitiesByEUID('bcc769ca-6cec-4c89-a8d7-bd408a3f4142');
+  if(torch[0].components.point_light.intensity == 20) {
+    torch[0].setComponent('point_light', { intensity: 0 });
+  }
+  
+  else {
+    torch[0].setComponent('point_light', { intensity: 20 });
+  }
+  
+}
+
+async function detection(){
+  const canvas = document.getElementById("display-canvas");
+  const rect   = canvas.getClientRects()[0];
+  var { entity, pickedPosition, pickedNormal } = await SDK3DVerse.engineAPI.castScreenSpaceRay(rect.x + rect.width / 2, rect.y + rect.height / 2, true, false);
+  const fresque = await SDK3DVerse.engineAPI.findEntitiesByEUID('3326febf-4b07-4e96-be3e-cf5e80b368fa');
+  const user = await SDK3DVerse.engineAPI.findEntitiesByEUID(characterControllerSceneUUID);
+  //console.log(fresque[0].getGlobalTransform().position);
+  const posFresque = fresque[0].getGlobalTransform().position;
+if(entity){
+  const fresqueFront = entity.getAncestors();
+  if(fresque[0].getEUID() == fresqueFront[0].components.euid.value){
+    console.log("dani TG");
+  }
+}
+
+  // const {entity, pickedPosition, pickedNormal} = await SDK3DVerse.engineAPI.castScreenSpaceRay(e.clientX, e.clientY, selectEntity, keepOldSelection);
+  // entity ? console.log('Selected entity', entity.getName()) : console.log('No entity selected');
+}
+;
