@@ -11,6 +11,9 @@ window.addEventListener("load", () => {
   InitApp(canvas);
 });
 
+//je n'ai pas fait ça c'est Noah et Dany
+var fresqueNumber = -1;
+const allAnimation = ["10d14021-0d21-4192-85ed-1f09c73212e9", "f77941a7-21ac-44d5-a518-b6daeede3783"];
 //------------------------------------------------------------------------------
 async function InitApp(canvas) {
   await SDK3DVerse.joinOrStartSession({
@@ -20,10 +23,13 @@ async function InitApp(canvas) {
     createDefaultCamera: false,
     startSimulation: "on-assets-loaded",
   });
-  
+  const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('992b1cf7-6443-495a-8a0a-e44efe88bd89');
+  const fresques = await allFresques[0].getChildren();
+  StopAnimationScientist();
   await InitFirstPersonController(characterControllerSceneUUID);
-  window.addEventListener("keydown", checkKeyPressed);
-  //canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
+
+  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques));
+  canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
 }
 
 //------------------------------------------------------------------------------
@@ -70,6 +76,18 @@ async function InitFirstPersonController(charCtlSceneUUID) {
 }
 
 //------------------------------------------------------------------------------
+async function deleteFPSCameraController(){
+  // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
+  // LOOK_DOWN actions.
+  SDK3DVerse.actionMap.values["LOOK_LEFT"][0] = ['MOUSE_BTN_LEFT', 'MOUSE_AXIS_X_POS'];
+  SDK3DVerse.actionMap.values["LOOK_RIGHT"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_X_NEG"];
+  SDK3DVerse.actionMap.values["LOOK_DOWN"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_Y_NEG"];
+  SDK3DVerse.actionMap.values["LOOK_UP"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_Y_POS"];
+  SDK3DVerse.actionMap.propagate();
+
+};
+
+//------------------------------------------------------------------------------
 async function setFPSCameraController(canvas){
   // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
   // LOOK_DOWN actions.
@@ -97,55 +115,82 @@ async function onClick(event) {
   const clickedEntity = target.entity;
 }
 
-async function checkKeyPressed(event){
+async function checkKeyPressed(event, fresques){
   if(event.key== "r"){
-    detection();
+    detection(fresques);
+  }
+  if(event.key== "p"){
+    fresqueNumber += 1;
+    PlayAnimationScientist();
   }
   if(event.key== "f"){
     changeStateTorch();
+  }
+  if(event.key== "Escape"){
+    deleteFPSCameraController();
   }
 }
 
 async function changeStateTorch(){
   const torch = await SDK3DVerse.engineAPI.findEntitiesByEUID('bcc769ca-6cec-4c89-a8d7-bd408a3f4142');
-  if(torch[0].components.point_light.intensity == 5) {
+  if(torch[0].components.point_light.intensity == 10) {
     torch[0].setComponent('point_light', { intensity: 0 });
   }
   
   else {
-    torch[0].setComponent('point_light', { intensity: 5 });
+    torch[0].setComponent('point_light', { intensity: 10 });
   }
   
 }
 
-async function detection(){
+async function detection(fresques){
   const canvas = document.getElementById("display-canvas");
   const rect   = canvas.getClientRects()[0];
   var { entity, pickedPosition, pickedNormal } = await SDK3DVerse.engineAPI.castScreenSpaceRay(rect.x + rect.width / 2, rect.y + rect.height / 2, true, false);
-  const fresque = await SDK3DVerse.engineAPI.findEntitiesByEUID('3326febf-4b07-4e96-be3e-cf5e80b368fa');
   const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
 
-  const childrenFresque = await fresque[0].getChildren();
-  const posFresque = await childrenFresque[0].getGlobalTransform().position;
+
+
   const posUser = await user[0].getTransform().position;
-  const dist = Math.sqrt( ((posFresque[0] - posUser[0]) **2 ) + ((posFresque[1] - posUser[1]) **2) + ((posFresque[2] - posUser[2]) **2));
-  console.log(posFresque);
-  console.log(posUser);
-  console.log(dist);
-  if(entity && dist<7){
+ 
+
+  if(entity){
     const fresqueFront = entity.getAncestors();
-  
-    if(fresque[0].getEUID() == fresqueFront[0].components.euid.value){
+    fresques.forEach(async function(fresque) {
+      const childrenFresque = await fresque.getChildren();
+      const posFresque = await childrenFresque[0].getGlobalTransform().position;
+      const dist = Math.sqrt( ((posFresque[0] - posUser[0]) **2 ) + ((posFresque[1] - posUser[1]) **2) + ((posFresque[2] - posUser[2]) **2));
 
-      childrenFresque[1].setVisibility(!childrenFresque[1].isVisible());
+      if(fresque.getEUID() == fresqueFront[0].components.euid.value &&  dist<7 ){
+        
+        for (let i = 0; i < 2; i++) {
+          if (fresque.children[1] == childrenFresque[i].rtid) {
+            childrenFresque[i].setVisibility(!childrenFresque[i].isVisible());
+          }
+        }
 
-    }
+      }  else if (dist >= 7){
+        
+        for (let i = 0; i < 2; i++) {
+          if (fresque.children[1] == childrenFresque[i].rtid) {
+            childrenFresque[i].setVisibility(false);
+          }
+        }
+        
+      }
+    });
   }
-  else if (dist >= 7){
-    childrenFresque[1].setVisibility(false);
-  }
+}
 
-  // const {entity, pickedPosition, pickedNormal} = await SDK3DVerse.engineAPI.castScreenSpaceRay(e.clientX, e.clientY, selectEntity, keepOldSelection);
-  // entity ? console.log('Selected entity', entity.getName()) : console.log('No entity selected');
+async function PlayAnimationScientist(){
+  const settings = { playbackSpeed : 1.0 };
+  if (fresqueNumber < allAnimation.length) {
+    SDK3DVerse.engineAPI.stopAnimationSequence(allAnimation[fresqueNumber]);
+    SDK3DVerse.engineAPI.playAnimationSequence(allAnimation[fresqueNumber], settings);
+  }
+}
+async function StopAnimationScientist(){
+  console.log("stop");
+  SDK3DVerse.engineAPI.stopAnimationSequence(allAnimation[0]);
 }
 ;
