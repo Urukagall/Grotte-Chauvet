@@ -4,7 +4,7 @@
 
 ## Try it out
 
-[Try it out](https://3dverse.github.io/sample-first-person-controller/)
+[Try it out](https://urukagall.github.io/Grotte-Chauvet/)
 
 ## Description
 
