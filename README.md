@@ -1,6 +1,3 @@
-# First Person Controller
-
-![First Person Character Controller](https://github.com/3dverse/sample-first-person-controller/blob/main/screenshot.png?raw=true)
 
 ## Try it out
 
