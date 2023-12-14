@@ -11,7 +11,7 @@ window.addEventListener("load", () => {
   InitApp(canvas);
 });
 
-
+var listVector = [];
 var fresqueNumber = -1;
 const allAnimation = ["10d14021-0d21-4192-85ed-1f09c73212e9", "f77941a7-21ac-44d5-a518-b6daeede3783"];
 //<audio src="jupiter.mp3" id="jupiter"></audio>
@@ -29,6 +29,7 @@ async function InitApp(canvas) {
   const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('992b1cf7-6443-495a-8a0a-e44efe88bd89');
   const fresques = await allFresques[0].getChildren();
   InitFresque(fresques);
+  InitVector();
   StopAnimationScientist();
   await InitFirstPersonController(characterControllerSceneUUID);
 
@@ -47,14 +48,52 @@ async function InitFresque(fresques){
           childrenFresque[i].setVisibility(false);
         }
       }
+
   });
 }
 async function InitVector(){
+  const pointList = await SDK3DVerse.engineAPI.findEntitiesByEUID('ea10f940-5832-4b01-a167-00ef00bfefe1');
+  const childrenList = await pointList[0].getChildren();
+  const sizeChildrenList = childrenList.length;
+  console.log("aaa", childrenList);
 
+  for (let i = 0; i < sizeChildrenList - 1; i++) {
+
+    var pointA = [0,0,0]
+    var pointB = [0,0,0]
+
+    for (let j = 0; j < sizeChildrenList; j++) {
+
+      if (pointList[0].children[i] == childrenList[j].rtid) {
+        pointA = childrenList[j].getGlobalTransform().position;
+      }
+
+      else if (pointList[0].children[i + 1] == childrenList[j].rtid) {
+        
+        pointB = childrenList[j].getGlobalTransform().position;
+      }
+
+    }
+
+    await Vector(pointA, pointB);
+
+    // const pointA = childrenList[i].getGlobalTransform().position;
+    // console.log("A",pointA);
+    // const pointB = childrenList[i + 1].getGlobalTransform().position;
+    // console.log("B",pointB);
+
+  }
+  //console.log(listVector);
 }
 
 async function Vector(a , b){
-  
+  var vect = [0,0,0];
+  var norm = Math.sqrt( ((b[0]-a[0])**2) + ((b[1]-a[1])**2) + ((b[2]-a[2])**2))
+  vect[0] = (b[0] - a[0]) / norm; 
+  vect[1] = (b[1] - a[1]) / norm; 
+  vect[2] = (b[2] - a[2]) / norm; 
+  //console.log(vect);
+  listVector.push(vect);
 }
 
 //------------------------------------------------------------------------------
@@ -227,11 +266,13 @@ async function update(scientist)
   const deltaTime = performance.now() - lastTime;
   lastTime = performance.now();
   const scientistPosition = scientist[0].getGlobalTransform();
-  console.log("1",scientistPosition.position);
-  scientistPosition.position[0] += 0.0001 * deltaTime;
-  console.log(scientistPosition.position);
+  //console.log("1",scientistPosition.position);
+  console.log(listVector);
+  scientistPosition.position[0] += 0.001 * deltaTime * listVector[0][0]; // 
+  scientistPosition.position[1] += 0.001 * deltaTime * listVector[0][1]; // 
+  scientistPosition.position[2] += 0.001 * deltaTime * listVector[0][2]; // 
+  //console.log(scientistPosition.position);
   scientist[0].setGlobalTransform(scientistPosition);
-  
   //document.getElementById('jupiter').play();
 }
 
