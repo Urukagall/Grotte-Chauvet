@@ -11,9 +11,12 @@ window.addEventListener("load", () => {
   InitApp(canvas);
 });
 
-//je n'ai pas fait ça c'est Noah et Dany
+
 var fresqueNumber = -1;
 const allAnimation = ["10d14021-0d21-4192-85ed-1f09c73212e9", "f77941a7-21ac-44d5-a518-b6daeede3783"];
+//<audio src="jupiter.mp3" id="jupiter"></audio>
+
+
 //------------------------------------------------------------------------------
 async function InitApp(canvas) {
   await SDK3DVerse.joinOrStartSession({
@@ -25,11 +28,33 @@ async function InitApp(canvas) {
   });
   const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('992b1cf7-6443-495a-8a0a-e44efe88bd89');
   const fresques = await allFresques[0].getChildren();
+  InitFresque(fresques);
   StopAnimationScientist();
   await InitFirstPersonController(characterControllerSceneUUID);
 
+  const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('954ad3dd-ab61-4ee5-98c8-a352c2f63c8c');
   window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques));
   canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
+  SDK3DVerse.notifier.on('onFramePostRender', () => update(scientist));
+}
+
+async function InitFresque(fresques){
+  fresques.forEach(async function(fresque) {
+    const childrenFresque = await fresque.getChildren();
+
+      for (let i = 0; i < 2; i++) {
+        if (fresque.children[1] == childrenFresque[i].rtid) {
+          childrenFresque[i].setVisibility(false);
+        }
+      }
+  });
+}
+async function InitVector(){
+
+}
+
+async function Vector(a , b){
+  
 }
 
 //------------------------------------------------------------------------------
@@ -189,8 +214,25 @@ async function PlayAnimationScientist(){
     SDK3DVerse.engineAPI.playAnimationSequence(allAnimation[fresqueNumber], settings);
   }
 }
+
 async function StopAnimationScientist(){
   console.log("stop");
   SDK3DVerse.engineAPI.stopAnimationSequence(allAnimation[0]);
 }
+
+let lastTime = performance.now();
+
+async function update(scientist)
+{
+  const deltaTime = performance.now() - lastTime;
+  lastTime = performance.now();
+  const scientistPosition = scientist[0].getGlobalTransform();
+  console.log("1",scientistPosition.position);
+  scientistPosition.position[0] += 0.0001 * deltaTime;
+  console.log(scientistPosition.position);
+  scientist[0].setGlobalTransform(scientistPosition);
+  
+  //document.getElementById('jupiter').play();
+}
+
 ;
