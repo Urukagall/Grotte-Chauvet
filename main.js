@@ -14,8 +14,7 @@ window.addEventListener("load", () => {
 var listVector = [];
 var fresqueNumber = -1;
 const allAnimation = ["10d14021-0d21-4192-85ed-1f09c73212e9", "f77941a7-21ac-44d5-a518-b6daeede3783"];
-//<audio src="jupiter.mp3" id="jupiter"></audio>
-
+<audio src="5fruitetlegumeparjour\Dany.mp3" id="Dany"></audio>
 
 //------------------------------------------------------------------------------
 async function InitApp(canvas) {
@@ -34,6 +33,7 @@ async function InitApp(canvas) {
   await InitFirstPersonController(characterControllerSceneUUID);
 
   const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('954ad3dd-ab61-4ee5-98c8-a352c2f63c8c');
+  scientist[0].getElementById('Dany').play();
   window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques));
   canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
   SDK3DVerse.notifier.on('onFramePostRender', () => update(scientist));
@@ -55,7 +55,6 @@ async function InitVector(){
   const pointList = await SDK3DVerse.engineAPI.findEntitiesByEUID('ea10f940-5832-4b01-a167-00ef00bfefe1');
   const childrenList = await pointList[0].getChildren();
   const sizeChildrenList = childrenList.length;
-  console.log("aaa", childrenList);
 
   for (let i = 0; i < sizeChildrenList - 1; i++) {
 
@@ -76,14 +75,7 @@ async function InitVector(){
     }
 
     await Vector(pointA, pointB);
-
-    // const pointA = childrenList[i].getGlobalTransform().position;
-    // console.log("A",pointA);
-    // const pointB = childrenList[i + 1].getGlobalTransform().position;
-    // console.log("B",pointB);
-
   }
-  //console.log(listVector);
 }
 
 async function Vector(a , b){
@@ -92,7 +84,6 @@ async function Vector(a , b){
   vect[0] = (b[0] - a[0]) / norm; 
   vect[1] = (b[1] - a[1]) / norm; 
   vect[2] = (b[2] - a[2]) / norm; 
-  //console.log(vect);
   listVector.push(vect);
 }
 
@@ -141,8 +132,8 @@ async function InitFirstPersonController(charCtlSceneUUID) {
 
 //------------------------------------------------------------------------------
 async function deleteFPSCameraController(){
-  // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
-  // LOOK_DOWN actions.
+  // Remove the camera controls set by the setFPSCameraController function, and
+  //reverse to the default 3Dverse camera controls
   SDK3DVerse.actionMap.values["LOOK_LEFT"][0] = ['MOUSE_BTN_LEFT', 'MOUSE_AXIS_X_POS'];
   SDK3DVerse.actionMap.values["LOOK_RIGHT"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_X_NEG"];
   SDK3DVerse.actionMap.values["LOOK_DOWN"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_Y_NEG"];
@@ -227,6 +218,8 @@ async function detection(fresques){
 
       if(fresque.getEUID() == fresqueFront[0].components.euid.value &&  dist<7 ){
         
+        //document.getElementById('Dany').play();
+
         for (let i = 0; i < 2; i++) {
           if (fresque.children[1] == childrenFresque[i].rtid) {
             childrenFresque[i].setVisibility(!childrenFresque[i].isVisible());
@@ -266,14 +259,11 @@ async function update(scientist)
   const deltaTime = performance.now() - lastTime;
   lastTime = performance.now();
   const scientistPosition = scientist[0].getGlobalTransform();
-  //console.log("1",scientistPosition.position);
   console.log(listVector);
   scientistPosition.position[0] += 0.001 * deltaTime * listVector[0][0]; // 
   scientistPosition.position[1] += 0.001 * deltaTime * listVector[0][1]; // 
   scientistPosition.position[2] += 0.001 * deltaTime * listVector[0][2]; // 
-  //console.log(scientistPosition.position);
-  scientist[0].setGlobalTransform(scientistPosition);
-  //document.getElementById('jupiter').play();
+  //scientist[0].setGlobalTransform(scientistPosition);
 }
 
 ;
