@@ -12,9 +12,7 @@ window.addEventListener("load", () => {
 });
 
 var listVector = [];
-var fresqueNumber = -1;
-const allAnimation = ["10d14021-0d21-4192-85ed-1f09c73212e9", "f77941a7-21ac-44d5-a518-b6daeede3783"];
-<audio src="5fruitetlegumeparjour\Dany.mp3" id="Dany"></audio>
+
 
 //------------------------------------------------------------------------------
 async function InitApp(canvas) {
@@ -29,7 +27,6 @@ async function InitApp(canvas) {
   const fresques = await allFresques[0].getChildren();
   InitFresque(fresques);
   InitVector();
-  StopAnimationScientist();
   await InitFirstPersonController(characterControllerSceneUUID);
 
   const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('954ad3dd-ab61-4ee5-98c8-a352c2f63c8c');
@@ -174,10 +171,6 @@ async function checkKeyPressed(event, fresques){
   if(event.key== "r"){
     detection(fresques);
   }
-  if(event.key== "p"){
-    fresqueNumber += 1;
-    PlayAnimationScientist();
-  }
   if(event.key== "f"){
     changeStateTorch();
   }
@@ -219,6 +212,7 @@ async function detection(fresques){
       if(fresque.getEUID() == fresqueFront[0].components.euid.value &&  dist<7 ){
         
         //document.getElementById('Dany').play();
+        //scientist[0].sound_ref().value();
 
         for (let i = 0; i < 2; i++) {
           if (fresque.children[1] == childrenFresque[i].rtid) {
@@ -239,18 +233,7 @@ async function detection(fresques){
   }
 }
 
-async function PlayAnimationScientist(){
-  const settings = { playbackSpeed : 1.0 };
-  if (fresqueNumber < allAnimation.length) {
-    SDK3DVerse.engineAPI.stopAnimationSequence(allAnimation[fresqueNumber]);
-    SDK3DVerse.engineAPI.playAnimationSequence(allAnimation[fresqueNumber], settings);
-  }
-}
 
-async function StopAnimationScientist(){
-  console.log("stop");
-  SDK3DVerse.engineAPI.stopAnimationSequence(allAnimation[0]);
-}
 
 let lastTime = performance.now();
 
@@ -263,7 +246,7 @@ async function update(scientist)
   scientistPosition.position[0] += 0.001 * deltaTime * listVector[0][0]; // 
   scientistPosition.position[1] += 0.001 * deltaTime * listVector[0][1]; // 
   scientistPosition.position[2] += 0.001 * deltaTime * listVector[0][2]; // 
-  //scientist[0].setGlobalTransform(scientistPosition);
+  scientist[0].setGlobalTransform(scientistPosition);
 }
 
 ;
