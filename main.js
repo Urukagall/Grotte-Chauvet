@@ -12,7 +12,9 @@ window.addEventListener("load", () => {
 });
 
 var listVector = [];
-
+var stepScientist = -1;
+var scientistTalk = false;
+var pointPosition = [];
 
 //------------------------------------------------------------------------------
 async function InitApp(canvas) {
@@ -23,15 +25,19 @@ async function InitApp(canvas) {
     createDefaultCamera: false,
     startSimulation: "on-assets-loaded",
   });
-  const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('992b1cf7-6443-495a-8a0a-e44efe88bd89');
+  // const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('992b1cf7-6443-495a-8a0a-e44efe88bd89');
+  const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('854046a4-430c-4425-a777-d08d7d235046');
+
+  const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('0e2ee174-f680-42b1-9f81-2122beea911a');
+  // const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('954ad3dd-ab61-4ee5-98c8-a352c2f63c8c');
+
   const fresques = await allFresques[0].getChildren();
   InitFresque(fresques);
   InitVector();
-  await InitFirstPersonController(characterControllerSceneUUID);
 
-  const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('954ad3dd-ab61-4ee5-98c8-a352c2f63c8c');
-  scientist[0].getElementById('Dany').play();
-  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques));
+  await InitFirstPersonController(characterControllerSceneUUID);
+  
+  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, scientist));
   canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
   SDK3DVerse.notifier.on('onFramePostRender', () => update(scientist));
 }
@@ -48,8 +54,10 @@ async function InitFresque(fresques){
 
   });
 }
+
 async function InitVector(){
-  const pointList = await SDK3DVerse.engineAPI.findEntitiesByEUID('ea10f940-5832-4b01-a167-00ef00bfefe1');
+  // const pointList = await SDK3DVerse.engineAPI.findEntitiesByEUID('ea10f940-5832-4b01-a167-00ef00bfefe1');
+  const pointList = await SDK3DVerse.engineAPI.findEntitiesByEUID('dfef5092-40f5-48a2-9ced-27cb368a03b0');
   const childrenList = await pointList[0].getChildren();
   const sizeChildrenList = childrenList.length;
 
@@ -58,20 +66,36 @@ async function InitVector(){
     var pointA = [0,0,0]
     var pointB = [0,0,0]
 
-    for (let j = 0; j < sizeChildrenList; j++) {
+    pointA = childrenList[i].getGlobalTransform().position;
+    pointB = childrenList[i + 1].getGlobalTransform().position;
+    // for (let j = 0; j < sizeChildrenList; j++) {
 
-      if (pointList[0].children[i] == childrenList[j].rtid) {
-        pointA = childrenList[j].getGlobalTransform().position;
-      }
+    //   if (pointList[0].children[i] == childrenList[j].rtid) {
+    //     pointA = childrenList[j].getGlobalTransform().position;
+    //   }
 
-      else if (pointList[0].children[i + 1] == childrenList[j].rtid) {
+    //   else if (pointList[0].children[i + 1] == childrenList[j].rtid) {
         
-        pointB = childrenList[j].getGlobalTransform().position;
-      }
+    //     pointB = childrenList[j].getGlobalTransform().position;
+    //   }
 
-    }
-
+    // }
     await Vector(pointA, pointB);
+  }
+  for (let i = 0; i < sizeChildrenList ; i++) {
+
+    const pos = childrenList[i].getGlobalTransform().position;
+    pointPosition.push(pos);
+
+    // for (let j = 0; j < sizeChildrenList; j++) {
+
+    //   if (pointList[0].children[i] == childrenList[j].rtid) {
+    //     const pos = childrenList[j].getGlobalTransform().position;
+    //     pointPosition.push(pos);
+    //   }
+
+    // }
+
   }
 }
 
@@ -167,16 +191,19 @@ async function onClick(event) {
   const clickedEntity = target.entity;
 }
 
-async function checkKeyPressed(event, fresques){
+async function checkKeyPressed(event, fresques, scientist){
   if(event.key== "r"){
-    detection(fresques);
+    detection(fresques, scientist);
   }
+
   if(event.key== "f"){
     changeStateTorch();
   }
+
   if(event.key== "Escape"){
     deleteFPSCameraController();
   }
+
 }
 
 async function changeStateTorch(){
@@ -191,7 +218,7 @@ async function changeStateTorch(){
   
 }
 
-async function detection(fresques){
+async function detection(fresques, scientist){
   const canvas = document.getElementById("display-canvas");
   const rect   = canvas.getClientRects()[0];
   var { entity, pickedPosition, pickedNormal } = await SDK3DVerse.engineAPI.castScreenSpaceRay(rect.x + rect.width / 2, rect.y + rect.height / 2, true, false);
@@ -204,48 +231,73 @@ async function detection(fresques){
 
   if(entity){
     const fresqueFront = entity.getAncestors();
-    fresques.forEach(async function(fresque) {
-      const childrenFresque = await fresque.getChildren();
-      const posFresque = await childrenFresque[0].getGlobalTransform().position;
-      const dist = Math.sqrt( ((posFresque[0] - posUser[0]) **2 ) + ((posFresque[1] - posUser[1]) **2) + ((posFresque[2] - posUser[2]) **2));
-
-      if(fresque.getEUID() == fresqueFront[0].components.euid.value &&  dist<7 ){
-        
-        //document.getElementById('Dany').play();
-        //scientist[0].sound_ref().value();
-
-        for (let i = 0; i < 2; i++) {
-          if (fresque.children[1] == childrenFresque[i].rtid) {
-            childrenFresque[i].setVisibility(!childrenFresque[i].isVisible());
-          }
+    if(fresqueFront[0].components.euid.value == scientist[0].getEUID()){
+      console.log("go");
+      const scientistPosition = scientist[0].getGlobalTransform().position;
+      const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
+      if(dist<7){
+        if(!scientistTalk && stepScientist>=0){
+          document.getElementById('Dany').play();
+          console.log("speak");
+          scientistTalk = true
+        }else{
+          if(stepScientist!=0){
+            document.getElementById('Dany').pause();
+            document.getElementById('Dany').currentTime = 0;
+          }            
+          console.log("tg Dany");
+          stepScientist += 1 ;
+          scientistTalk = false;
         }
-
-      }  else if (dist >= 7){
-        
-        for (let i = 0; i < 2; i++) {
-          if (fresque.children[1] == childrenFresque[i].rtid) {
-            childrenFresque[i].setVisibility(false);
-          }
-        }
-        
       }
-    });
+    }else{
+      fresques.forEach(async function(fresque) {
+        const childrenFresque = await fresque.getChildren();
+        const posFresque = await childrenFresque[0].getGlobalTransform().position;
+        const dist = Math.sqrt( ((posFresque[0] - posUser[0]) **2 ) + ((posFresque[1] - posUser[1]) **2) + ((posFresque[2] - posUser[2]) **2));
+  
+        if(fresque.getEUID() == fresqueFront[0].components.euid.value &&  dist<7 ){
+          
+          
+  
+          for (let i = 0; i < 2; i++) {
+            if (fresque.children[1] == childrenFresque[i].rtid) {
+              childrenFresque[i].setVisibility(!childrenFresque[i].isVisible());
+            }
+          }
+  
+        }  else if (dist >= 7){
+          
+          for (let i = 0; i < 2; i++) {
+            if (fresque.children[1] == childrenFresque[i].rtid) {
+              childrenFresque[i].setVisibility(false);
+            }
+          }
+          
+        }
+      });
+    }
+
   }
 }
 
-
-
-let lastTime = performance.now();
+var lastTime = performance.now();
 
 async function update(scientist)
 {
   const deltaTime = performance.now() - lastTime;
   lastTime = performance.now();
   const scientistPosition = scientist[0].getGlobalTransform();
-  console.log(listVector);
-  scientistPosition.position[0] += 0.001 * deltaTime * listVector[0][0]; // 
-  scientistPosition.position[1] += 0.001 * deltaTime * listVector[0][1]; // 
-  scientistPosition.position[2] += 0.001 * deltaTime * listVector[0][2]; // 
+  const dist = Math.sqrt( ((pointPosition[stepScientist + 1][0] - scientistPosition.position[0]) **2 ) + ((pointPosition[stepScientist + 1][1] - scientistPosition.position[1]) **2) + ((pointPosition[stepScientist + 1][2] - scientistPosition.position[2]) **2));
+  
+  if(dist >= 0.1 && stepScientist >=0 && listVector.length > stepScientist ){
+    scientistPosition.position[0] += 0.001 * deltaTime * listVector[stepScientist][0]; 
+    scientistPosition.position[1] += 0.001 * deltaTime * listVector[stepScientist][1]; 
+    scientistPosition.position[2] += 0.001 * deltaTime * listVector[stepScientist][2]; 
+  }else if(stepScientist !=-1 && stepScientist !=1){
+    stepScientist += 1;
+  }
+
   scientist[0].setGlobalTransform(scientistPosition);
 }
 
