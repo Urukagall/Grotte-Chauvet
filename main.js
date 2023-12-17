@@ -28,7 +28,7 @@ async function InitApp(canvas) {
   // const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('992b1cf7-6443-495a-8a0a-e44efe88bd89');
   const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('854046a4-430c-4425-a777-d08d7d235046');
 
-  const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('0e2ee174-f680-42b1-9f81-2122beea911a');
+  const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
   // const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('954ad3dd-ab61-4ee5-98c8-a352c2f63c8c');
 
   const fresques = await allFresques[0].getChildren();
@@ -57,7 +57,7 @@ async function InitFresque(fresques){
 
 async function InitVector(){
   // const pointList = await SDK3DVerse.engineAPI.findEntitiesByEUID('ea10f940-5832-4b01-a167-00ef00bfefe1');
-  const pointList = await SDK3DVerse.engineAPI.findEntitiesByEUID('dfef5092-40f5-48a2-9ced-27cb368a03b0');
+  const pointList = await SDK3DVerse.engineAPI.findEntitiesByEUID('eb4d7ab6-113d-4148-b2d1-43ddbc056291');
   const childrenList = await pointList[0].getChildren();
   const sizeChildrenList = childrenList.length;
 
