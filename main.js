@@ -28,7 +28,7 @@ async function InitApp(canvas) {
   // const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('992b1cf7-6443-495a-8a0a-e44efe88bd89');
   const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('854046a4-430c-4425-a777-d08d7d235046');
 
-  const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
+  const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
   // const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('954ad3dd-ab61-4ee5-98c8-a352c2f63c8c');
 
   const fresques = await allFresques[0].getChildren();
@@ -66,35 +66,35 @@ async function InitVector(){
     var pointA = [0,0,0]
     var pointB = [0,0,0]
 
-    pointA = childrenList[i].getGlobalTransform().position;
-    pointB = childrenList[i + 1].getGlobalTransform().position;
-    // for (let j = 0; j < sizeChildrenList; j++) {
+    // pointA = childrenList[i].getGlobalTransform().position;
+    // pointB = childrenList[i + 1].getGlobalTransform().position;
+    for (let j = 0; j < sizeChildrenList; j++) {
 
-    //   if (pointList[0].children[i] == childrenList[j].rtid) {
-    //     pointA = childrenList[j].getGlobalTransform().position;
-    //   }
+      if (pointList[0].children[i] == childrenList[j].rtid) {
+        pointA = childrenList[j].getGlobalTransform().position;
+      }
 
-    //   else if (pointList[0].children[i + 1] == childrenList[j].rtid) {
+      else if (pointList[0].children[i + 1] == childrenList[j].rtid) {
         
-    //     pointB = childrenList[j].getGlobalTransform().position;
-    //   }
+        pointB = childrenList[j].getGlobalTransform().position;
+      }
 
-    // }
+    }
     await Vector(pointA, pointB);
   }
   for (let i = 0; i < sizeChildrenList ; i++) {
 
-    const pos = childrenList[i].getGlobalTransform().position;
-    pointPosition.push(pos);
+    // const pos = childrenList[i].getGlobalTransform().position;
+    // pointPosition.push(pos);
 
-    // for (let j = 0; j < sizeChildrenList; j++) {
+    for (let j = 0; j < sizeChildrenList; j++) {
 
-    //   if (pointList[0].children[i] == childrenList[j].rtid) {
-    //     const pos = childrenList[j].getGlobalTransform().position;
-    //     pointPosition.push(pos);
-    //   }
+      if (pointList[0].children[i] == childrenList[j].rtid) {
+        const pos = childrenList[j].getGlobalTransform().position;
+        pointPosition.push(pos);
+      }
 
-    // }
+    }
 
   }
 }
@@ -231,23 +231,30 @@ async function detection(fresques, scientist){
 
   if(entity){
     const fresqueFront = entity.getAncestors();
+    console.log(fresqueFront[0]);
     if(fresqueFront[0].components.euid.value == scientist[0].getEUID()){
       console.log("go");
       const scientistPosition = scientist[0].getGlobalTransform().position;
+      const scientistTransform = scientist[0].getGlobalTransform();
       const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
       if(dist<7){
         if(!scientistTalk && stepScientist>=0){
-          document.getElementById('Dany').play();
+          document.getElementById('Lyon').play();
           console.log("speak");
           scientistTalk = true
         }else{
-          if(stepScientist!=0){
-            document.getElementById('Dany').pause();
-            document.getElementById('Dany').currentTime = 0;
+          if(stepScientist!=0 && scientistTalk){
+            document.getElementById('Lyon').pause();
+            document.getElementById('Lyon').currentTime = 0;
           }            
-          console.log("tg Dany");
+          console.log("tg Lyon");
           stepScientist += 1 ;
           scientistTalk = false;
+
+          scientistTransform.orientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
+          console.log(scientistTransform.orientation);
+          scientist[0].setGlobalTransform(scientistTransform);
+          console.log(scientistTransform.orientation);
         }
       }
     }else{
@@ -281,24 +288,42 @@ async function detection(fresques, scientist){
   }
 }
 
+async function rotation(pointA, pointB)
+{
+  const deltaX = pointB[0] - pointA[0];
+  const deltaZ = pointB[2] - pointA[2];
+
+  const angleRad = Math.atan2(deltaZ, deltaX);
+  //console.log(angleRad);
+
+  const angleDeg = (angleRad * 180) / Math.PI;
+
+  return angleDeg;
+}
+
 var lastTime = performance.now();
 
 async function update(scientist)
 {
   const deltaTime = performance.now() - lastTime;
   lastTime = performance.now();
-  const scientistPosition = scientist[0].getGlobalTransform();
-  const dist = Math.sqrt( ((pointPosition[stepScientist + 1][0] - scientistPosition.position[0]) **2 ) + ((pointPosition[stepScientist + 1][1] - scientistPosition.position[1]) **2) + ((pointPosition[stepScientist + 1][2] - scientistPosition.position[2]) **2));
-  
-  if(dist >= 0.1 && stepScientist >=0 && listVector.length > stepScientist ){
-    scientistPosition.position[0] += 0.001 * deltaTime * listVector[stepScientist][0]; 
-    scientistPosition.position[1] += 0.001 * deltaTime * listVector[stepScientist][1]; 
-    scientistPosition.position[2] += 0.001 * deltaTime * listVector[stepScientist][2]; 
-  }else if(stepScientist !=-1 && stepScientist !=1){
-    stepScientist += 1;
+  const scientistTransform = scientist[0].getGlobalTransform();
+  if (listVector.length > stepScientist) {
+
+    const dist = Math.sqrt( ((pointPosition[stepScientist + 1][0] - scientistTransform.position[0]) **2 ) + ((pointPosition[stepScientist + 1][1] - scientistTransform.position[1]) **2) + ((pointPosition[stepScientist + 1][2] - scientistTransform.position[2]) **2));
+    
+    //console.log(dist);
+    if(dist >= 0.1 && stepScientist >=0 ){
+      scientistTransform.position[0] += 0.0005 * deltaTime * listVector[stepScientist][0]; 
+      scientistTransform.position[1] += 0.0005 * deltaTime * listVector[stepScientist][1]; 
+      scientistTransform.position[2] += 0.0005 * deltaTime * listVector[stepScientist][2]; 
+    }else if(stepScientist !=-1 && stepScientist !=1){
+      stepScientist += 1;
+      scientistTransform.orientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
+    }
   }
 
-  scientist[0].setGlobalTransform(scientistPosition);
+  scientist[0].setGlobalTransform(scientistTransform);
 }
 
 ;
