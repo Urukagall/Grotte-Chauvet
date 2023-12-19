@@ -15,12 +15,25 @@ var listVector = [];
 var stepScientist = -1;
 var scientistTalk = false;
 var pointPosition = [];
+var audioList = [];
+var stepAudio = 0;
 
 SDK3DVerse.notifier.on('onAssetsLoadedChanged', (areAssetsLoaded) =>
 {
-    if (areAssetsLoaded) {
+  console.log('areAssetsLoaded', areAssetsLoaded);
+  if (areAssetsLoaded) {
+      console.log('areAssetsLoaded', areAssetsLoaded);
+      
       const element = document.getElementById("id1");
-      element.innerHTML="<canvas id='display-canvas' class='display-canvas' tabindex='1' oncontextmenu='event.preventDefault()'></canvas>"
+      element.innerHTML="<canvas id='display-canvas' class='display-canvas' tabindex='1' oncontextmenu='event.preventDefault()'></canvas>";
+
+      document.getElementById("display-canvas").style.display = "block";
+      document.getElementById("caveTitle").style.display = "none";
+      document.getElementById("loadingText").style.display = "none";
+      
+    }
+    else{
+      document.getElementById("display-canvas").style.display = "none";
     }
 });
 
@@ -34,6 +47,11 @@ async function InitApp(canvas) {
     createDefaultCamera: false,
     startSimulation: "on-assets-loaded",
   });
+  
+  document.getElementById("loadingIcon").style.display = "none";
+
+  audioList.push("Lyon");
+
   // const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('992b1cf7-6443-495a-8a0a-e44efe88bd89');
   const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('854046a4-430c-4425-a777-d08d7d235046');
 
@@ -252,28 +270,32 @@ async function detection(fresques, scientist){
   if(entity){
     const fresqueFront = entity.getAncestors();
     console.log(fresqueFront[0]);
+    
     if(fresqueFront[0].components.euid.value == scientist[0].getEUID()){
-      console.log("go");
-      const scientistPosition = scientist[0].getGlobalTransform().position;
-      const scientistTransform = scientist[0].getGlobalTransform();
-      const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
-      if(dist<7){
-        if(!scientistTalk && stepScientist>=0){
-          document.getElementById('Lyon').play();
-          console.log("speak");
-          scientistTalk = true
-        }else{
-          if(stepScientist!=0 && scientistTalk){
-            document.getElementById('Lyon').pause();
-            document.getElementById('Lyon').currentTime = 0;
-          }            
-          console.log("tg Lyon");
-          stepScientist += 1 ;
-          scientistTalk = false;
-
-          scientistTransform.orientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
-          scientist[0].setGlobalTransform({ eulerOrientation : scientistTransform});
-
+      if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15){
+        console.log("go");
+        const scientistPosition = scientist[0].getGlobalTransform().position;
+        const scientistTransform = scientist[0].getGlobalTransform();
+        const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
+        if(dist<7){
+          if(!scientistTalk && stepScientist>=0){
+            document.getElementById(audioList[stepAudio]).play();
+            console.log("speak");
+            scientistTalk = true;
+            
+          }else{
+            if(stepScientist!=0 && scientistTalk){
+              document.getElementById(audioList[stepAudio]).pause();
+              document.getElementById(audioList[stepAudio]).currentTime = 0;
+            }            
+            console.log("no Lyon");
+            stepScientist += 1 ;
+            scientistTalk = false;
+            //stepAudio +=1;
+            scientistTransform.orientation[1] = await rotation(pointPosition[stepScientist ], pointPosition[stepScientist + 1]);
+            scientist[0].setGlobalTransform({ eulerOrientation : scientistTransform});
+  
+          }
         }
       }
     }else{
@@ -298,7 +320,7 @@ async function detection(fresques, scientist){
   
           truePanneau.setVisibility(!truePanneau.isVisible());
   
-        }  else if (dist >= 10){
+        }  else if (fresque.getEUID() == fresqueFront[0].components.euid.value && dist >= 10){
           
           truePanneau.setVisibility(false);
           
@@ -334,8 +356,9 @@ async function update(scientist)
     
     //console.log(dist);
     if(dist >= 0.1 && stepScientist >=0 ){
-      if(scientistAnime.Walking == false && scientistAnime.Standing == true){
+      if(scientistAnime.Walking == false && (scientistAnime.Standing == true || scientistAnime.Talking == true)){
         scientistAnime.Standing = false;
+        scientistAnime.Talking = false;
         scientistAnime.Walking = true;
         scientist[0].setComponent("animation_controller", scientistAnime);
       }
@@ -343,14 +366,27 @@ async function update(scientist)
       scientistTransform.position[0] += 0.0005 * deltaTime * listVector[stepScientist][0]; 
       scientistTransform.position[1] += 0.0005 * deltaTime * listVector[stepScientist][1]; 
       scientistTransform.position[2] += 0.0005 * deltaTime * listVector[stepScientist][2]; 
-    }else if(stepScientist !=-1 && stepScientist !=1){
+    }else if(stepScientist !=-1 && stepScientist !=3 && stepScientist !=7 && stepScientist !=14 && stepScientist !=15){
       stepScientist += 1;
       const rot = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
       scientistTransform.eulerOrientation[1] = rot;
     }else {
-      scientistAnime.Standing = true;
-      scientistAnime.Walking = false;
-      scientist[0].setComponent("animation_controller", scientistAnime);
+      if (scientistTalk == true) {
+        console.log(SDK3DVerse.engineAPI.cameraAPI.getActiveViewports()[0].getTransform().position);
+        const rot = await rotation(pointPosition[stepScientist + 1], SDK3DVerse.engineAPI.cameraAPI.getActiveViewports()[0].getTransform().position);
+        scientistTransform.eulerOrientation[1] = rot;
+      }
+      if(scientistTalk == true && scientistAnime.Talking == false){
+        scientistAnime.Standing = false;
+        scientistAnime.Talking = true;
+        scientist[0].setComponent("animation_controller", scientistAnime);
+      
+
+      }else if(scientistAnime.Walking == true){
+        scientistAnime.Standing = true;
+        scientistAnime.Walking = false;
+        scientist[0].setComponent("animation_controller", scientistAnime);
+      }
     }
   }
   scientist[0].setGlobalTransform({
