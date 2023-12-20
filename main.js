@@ -51,8 +51,6 @@ async function InitApp(canvas) {
     createDefaultCamera: false,
     startSimulation: "on-assets-loaded",
   });
-  
-  await SDK3DVerse.installExtension(SDK3DVerse_ThreeJS_Ext);
 
 
 
