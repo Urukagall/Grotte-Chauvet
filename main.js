@@ -51,9 +51,7 @@ async function InitApp(canvas) {
     createDefaultCamera: false,
     startSimulation: "on-assets-loaded",
   });
-
-
-
+  
   document.getElementById("loadingIcon").style.display = "none";
 
   //document.getElementById("Grotte").play();
