@@ -17,7 +17,8 @@ var scientistTalk = false;
 var pointPosition = [];
 var audioList = [];
 var stepAudio = 0;
-
+var currentCharacter;
+var rootCurrentCharacter;
 SDK3DVerse.notifier.on('onAssetsLoadedChanged', (areAssetsLoaded) =>
 {
   console.log('areAssetsLoaded', areAssetsLoaded);
@@ -50,7 +51,11 @@ async function InitApp(canvas) {
   
   document.getElementById("loadingIcon").style.display = "none";
 
+
+  audioList.push("lion");
+  audioList.push("rhino");
   audioList.push("Lyon");
+  audioList.push("bisons");
 
   // const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('992b1cf7-6443-495a-8a0a-e44efe88bd89');
   const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('854046a4-430c-4425-a777-d08d7d235046');
@@ -59,14 +64,9 @@ async function InitApp(canvas) {
   
   const rootScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
   // const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('954ad3dd-ab61-4ee5-98c8-a352c2f63c8c');
-  
-  var scientistAnime = rootScientist[0].getComponent('animation_controller').dataJSON;
-
-  scientistAnime.Standing = true;
-  scientistAnime.Walking = false;
-  scientistAnime.Talking = false;
-
-  rootScientist[0].setComponent("animation_controller", scientistAnime);
+  currentCharacter = scientist;
+  rootCurrentCharacter = rootScientist;
+  ResetAnime(rootCurrentCharacter);
 
   const fresques = await allFresques[0].getChildren();
   InitFresque(fresques);
@@ -74,9 +74,19 @@ async function InitApp(canvas) {
 
   await InitFirstPersonController(characterControllerSceneUUID);
   
-  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, scientist));
+  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, currentCharacter));
   canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
-  SDK3DVerse.notifier.on('onFramePostRender', () => update(rootScientist));
+  SDK3DVerse.notifier.on('onFramePostRender', () => update(rootCurrentCharacter));
+}
+
+async function ResetAnime(rootScientist){
+  var scientistAnime = rootScientist[0].getComponent('animation_controller').dataJSON;
+
+  scientistAnime.Standing = true;
+  scientistAnime.Walking = false;
+  scientistAnime.Talking = false;
+
+  rootScientist[0].setComponent("animation_controller", scientistAnime);
 }
 
 async function InitFresque(fresques){
@@ -290,10 +300,10 @@ async function detection(fresques, scientist){
             }            
             console.log("no Lyon");
             stepScientist += 1 ;
+            stepAudio += 1;
             scientistTalk = false;
-            //stepAudio +=1;
-            scientistTransform.orientation[1] = await rotation(pointPosition[stepScientist ], pointPosition[stepScientist + 1]);
-            scientist[0].setGlobalTransform({ eulerOrientation : scientistTransform});
+            scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
+            scientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
   
           }
         }
@@ -338,7 +348,7 @@ async function rotation(pointA, pointB)
 
   const angleRad = Math.atan2(deltaZ, deltaX);
 
-  var angleDeg = -(((angleRad * 180) / Math.PI) - 90);
+  var angleDeg = ((angleRad * 180) / Math.PI) - 90;
 
   return angleDeg;
 }
@@ -372,7 +382,6 @@ async function update(scientist)
       scientistTransform.eulerOrientation[1] = rot;
     }else {
       if (scientistTalk == true) {
-        console.log(SDK3DVerse.engineAPI.cameraAPI.getActiveViewports()[0].getTransform().position);
         const rot = await rotation(pointPosition[stepScientist + 1], SDK3DVerse.engineAPI.cameraAPI.getActiveViewports()[0].getTransform().position);
         scientistTransform.eulerOrientation[1] = rot;
       }
