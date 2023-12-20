@@ -19,23 +19,26 @@ var audioList = [];
 var stepAudio = 0;
 var currentCharacter;
 var rootCurrentCharacter;
+
+
 SDK3DVerse.notifier.on('onAssetsLoadedChanged', (areAssetsLoaded) =>
 {
   console.log('areAssetsLoaded', areAssetsLoaded);
   if (areAssetsLoaded) {
-      console.log('areAssetsLoaded', areAssetsLoaded);
-      
-      const element = document.getElementById("id1");
-      element.innerHTML="<canvas id='display-canvas' class='display-canvas' tabindex='1' oncontextmenu='event.preventDefault()'></canvas>";
+    console.log('areAssetsLoaded', areAssetsLoaded);
+    
+    const element = document.getElementById("id1");
+    element.innerHTML="<canvas id='display-canvas' class='display-canvas' tabindex='1' oncontextmenu='event.preventDefault()'></canvas>";
 
-      document.getElementById("display-canvas").style.display = "block";
-      document.getElementById("caveTitle").style.display = "none";
-      document.getElementById("loadingText").style.display = "none";
-      
-    }
-    else{
-      document.getElementById("display-canvas").style.display = "none";
-    }
+    document.getElementById("display-canvas").style.display = "block";
+    document.getElementById("caveTitle").style.display = "none";
+    document.getElementById("loadingText").style.display = "none";
+
+    
+  }
+  else{
+    document.getElementById("display-canvas").style.display = "none";
+  }
 });
 
 
@@ -49,21 +52,31 @@ async function InitApp(canvas) {
     startSimulation: "on-assets-loaded",
   });
   
+  await SDK3DVerse.installExtension(SDK3DVerse_ThreeJS_Ext);
+
+
+
   document.getElementById("loadingIcon").style.display = "none";
 
+  //document.getElementById("Grotte").play();
 
-  audioList.push("lion");
-  audioList.push("rhino");
+  audioList.push("Lion");
+  audioList.push("Rhino");
   audioList.push("Lyon");
-  audioList.push("bisons");
-
-  // const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('992b1cf7-6443-495a-8a0a-e44efe88bd89');
-  const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('854046a4-430c-4425-a777-d08d7d235046');
+  audioList.push("Bison");
 
   const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
-  
   const rootScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
-  // const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('954ad3dd-ab61-4ee5-98c8-a352c2f63c8c');
+
+  const caveman = await SDK3DVerse.engineAPI.findEntitiesByEUID('f2b4eac4-30a1-4cfa-8e07-6fad79d87f60');
+  const rootCaveman = await SDK3DVerse.engineAPI.findEntitiesByEUID('3e168942-2b13-4495-b5a2-84602ff0df9a');
+
+  const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('854046a4-430c-4425-a777-d08d7d235046');
+
+  
+
+  rootCaveman[0].setVisibility(false);
+  rootScientist[0].setVisibility(true);
   currentCharacter = scientist;
   rootCurrentCharacter = rootScientist;
   ResetAnime(rootCurrentCharacter);
@@ -71,10 +84,11 @@ async function InitApp(canvas) {
   const fresques = await allFresques[0].getChildren();
   InitFresque(fresques);
   InitVector();
+  InitCol();
 
   await InitFirstPersonController(characterControllerSceneUUID);
   
-  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, currentCharacter));
+  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter));
   canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
   SDK3DVerse.notifier.on('onFramePostRender', () => update(rootCurrentCharacter));
 }
@@ -89,6 +103,11 @@ async function ResetAnime(rootScientist){
   rootScientist[0].setComponent("animation_controller", scientistAnime);
 }
 
+async function InitCol(){
+  const debug = await SDK3DVerse.engineAPI.findEntitiesByEUID('618978eb-18b5-47dd-821e-067326e33fd6');
+  debug[0].setVisibility(false);
+}
+
 async function InitFresque(fresques){
   fresques.forEach(async function(fresque) {
     const childrenFresque = await fresque.getChildren();
@@ -98,8 +117,8 @@ async function InitFresque(fresques){
       //     childrenFresque[i].setVisibility(false);
       //   }
       // }
-      childrenFresque[0].setVisibility(false);
-    console.log(childrenFresque);
+      childrenFresque[0].setVisibility(true);
+      childrenFresque[1].setVisibility(true);
   });
 }
 
@@ -239,9 +258,9 @@ async function onClick(event) {
   const clickedEntity = target.entity;
 }
 
-async function checkKeyPressed(event, fresques, scientist){
+async function checkKeyPressed(event, fresques, scientist, rootScientist){
   if(event.key== "r"){
-    detection(fresques, scientist);
+    detection(fresques, scientist, rootScientist);
   }
 
   if(event.key== "f"){
@@ -252,6 +271,32 @@ async function checkKeyPressed(event, fresques, scientist){
     deleteFPSCameraController();
   }
 
+  if(event.key=="c" && stepScientist ==-1){
+    ChangeCharacter(scientist);
+  }
+}
+
+async function ChangeCharacter(scientist){
+  const s = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
+  const rS = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
+
+  const c = await SDK3DVerse.engineAPI.findEntitiesByEUID('f2b4eac4-30a1-4cfa-8e07-6fad79d87f60');
+  const rC = await SDK3DVerse.engineAPI.findEntitiesByEUID('3e168942-2b13-4495-b5a2-84602ff0df9a');
+
+  if(scientist[0].getEUID()== "bf3ff1b0-2b96-4482-839f-0e376ed76eed"){
+    currentCharacter = c;
+    rootCurrentCharacter = rC;
+    s[0].setVisibility(false);
+    c[0].setVisibility(true);
+    
+
+  }else{
+    currentCharacter = s;
+    rootCurrentCharacter = rS;
+    c[0].setVisibility(false);
+    s[0].setVisibility(true);
+  }
+  ResetAnime(rootCurrentCharacter);
 }
 
 async function changeStateTorch(){
@@ -266,7 +311,7 @@ async function changeStateTorch(){
   
 }
 
-async function detection(fresques, scientist){
+async function detection(fresques, scientist, rootScientist){
   const canvas = document.getElementById("display-canvas");
   const rect   = canvas.getClientRects()[0];
   var { entity, pickedPosition, pickedNormal } = await SDK3DVerse.engineAPI.castScreenSpaceRay(rect.x + rect.width / 2, rect.y + rect.height / 2, true, false);
@@ -279,31 +324,29 @@ async function detection(fresques, scientist){
 
   if(entity){
     const fresqueFront = entity.getAncestors();
-    console.log(fresqueFront[0]);
     
     if(fresqueFront[0].components.euid.value == scientist[0].getEUID()){
       if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15){
-        console.log("go");
         const scientistPosition = scientist[0].getGlobalTransform().position;
-        const scientistTransform = scientist[0].getGlobalTransform();
+        const scientistTransform = rootScientist[0].getGlobalTransform();
         const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
         if(dist<7){
           if(!scientistTalk && stepScientist>=0){
-            document.getElementById(audioList[stepAudio]).play();
-            console.log("speak");
+            const audio = audioList[stepAudio];
+            document.getElementById(audio).play();
             scientistTalk = true;
             
           }else{
             if(stepScientist!=0 && scientistTalk){
               document.getElementById(audioList[stepAudio]).pause();
               document.getElementById(audioList[stepAudio]).currentTime = 0;
+              stepAudio += 1;
             }            
-            console.log("no Lyon");
             stepScientist += 1 ;
-            stepAudio += 1;
+
             scientistTalk = false;
             scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
-            scientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
+            rootScientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
   
           }
         }
@@ -348,7 +391,7 @@ async function rotation(pointA, pointB)
 
   const angleRad = Math.atan2(deltaZ, deltaX);
 
-  var angleDeg = ((angleRad * 180) / Math.PI) - 90;
+  var angleDeg = -(((angleRad * 180) / Math.PI) - 90);
 
   return angleDeg;
 }
@@ -364,7 +407,6 @@ async function update(scientist)
 
     const dist = Math.sqrt( ((pointPosition[stepScientist + 1][0] - scientistTransform.position[0]) **2 ) + ((pointPosition[stepScientist + 1][1] - scientistTransform.position[1]) **2) + ((pointPosition[stepScientist + 1][2] - scientistTransform.position[2]) **2));
     
-    //console.log(dist);
     if(dist >= 0.1 && stepScientist >=0 ){
       if(scientistAnime.Walking == false && (scientistAnime.Standing == true || scientistAnime.Talking == true)){
         scientistAnime.Standing = false;
@@ -402,12 +444,6 @@ async function update(scientist)
     position : scientistTransform.position,
     eulerOrientation : scientistTransform.eulerOrientation
   });
-  // console.log(scientist[0]);
-  
-  // console.log(scientistTransform.eulerOrientation);
-  // console.log(scientist[0].components.local_transform.eulerOrientation);
-  // console.log(scientist[0].getGlobalTransform().eulerOrientation);
-  // console.log(scientist[0].getGlobalTransform().scale);
 }
 
 ;
