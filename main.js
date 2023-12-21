@@ -16,6 +16,8 @@ var stepScientist = -1;
 var scientistTalk = false;
 var pointPosition = [];
 var audioList = [];
+var audioScientist = ["Lion","Rhino","Lyon","Bison"];
+var audioCaveman = ["Lion-2","Rhino-2","Lyon-2","Bison-2"];
 var stepAudio = 0;
 var currentCharacter;
 var rootCurrentCharacter;
@@ -56,10 +58,6 @@ async function InitApp(canvas) {
 
   //document.getElementById("Grotte").play();
 
-  audioList.push("Lion");
-  audioList.push("Rhino");
-  audioList.push("Lyon");
-  audioList.push("Bison");
 
   const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
   const rootScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
@@ -270,7 +268,9 @@ async function checkKeyPressed(event, fresques, scientist, rootScientist){
   if(event.key=="c" && stepScientist ==-1){
     ChangeCharacter(scientist);
   }
+
 }
+
 
 async function ChangeCharacter(scientist){
   const s = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
@@ -284,13 +284,14 @@ async function ChangeCharacter(scientist){
     rootCurrentCharacter = rC;
     s[0].setVisibility(false);
     c[0].setVisibility(true);
-    
+    audioList = audioCaveman;
 
   }else{
     currentCharacter = s;
     rootCurrentCharacter = rS;
     c[0].setVisibility(false);
     s[0].setVisibility(true);
+    audioList = audioScientist;
   }
   ResetAnime(rootCurrentCharacter);
 }
