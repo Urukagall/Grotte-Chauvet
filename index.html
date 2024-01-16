@@ -31,9 +31,31 @@
       <img id="loadingIcon" src="./Gif/loading.gif">
 
     </div>
-
+    <img src="https://example.com/image1.jpg" alt="Image 1" class="clickable-image" id="image1">
+    <img src="https://example.com/image2.jpg" alt="Image 2" class="clickable-image" id="image2">
+  
     <!-- SDK 3DVERSE -->
     <script src="https://cdn.3dverse.com/legacy/sdk/stable/SDK3DVerse.js"></script>
+
+    <!-- JavaScript pour gérer le clic et masquer le carré -->
+    <script>
+      // Fonction pour gérer le clic sur les images et les faire disparaître
+      function handleImageClick(imageId) {
+        var image = document.getElementById(imageId);
+        if (image) {
+          image.style.display = "none";
+        }
+      }
+  
+      // Ajout d'un gestionnaire d'événements pour chaque image
+      document.getElementById("image1").addEventListener("click", function() {
+        handleImageClick("image1");
+      });
+  
+      document.getElementById("image2").addEventListener("click", function() {
+        handleImageClick("image2");
+      });
+    </script>
 
     <!-- APP ENTRYPOINT -->
     <script src="./main.js" type="module"></script>
