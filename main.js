@@ -32,14 +32,14 @@ SDK3DVerse.notifier.on('onAssetsLoadedChanged', (areAssetsLoaded) =>
     const element = document.getElementById("id1");
     element.innerHTML="<canvas id='display-canvas' class='display-canvas' tabindex='1' oncontextmenu='event.preventDefault()'></canvas>";
 
-    document.getElementById("display-canvas").style.display = "block";
-    document.getElementById("caveTitle").style.display = "none";
-    document.getElementById("loadingText").style.display = "none";
+    document.getElementById("display-canvas").style.display = "none";
+    document.getElementById("home").style.display = "block";
 
     
   }
   else{
     document.getElementById("display-canvas").style.display = "none";
+
   }
 });
 
@@ -56,6 +56,9 @@ async function InitApp(canvas) {
   
   document.getElementById("loadingIcon").style.display = "none";
 
+  document.getElementById("home").style.display = "block";
+
+
   //document.getElementById("Grotte").play();
 
 
@@ -70,7 +73,7 @@ async function InitApp(canvas) {
   
 
   rootCaveman[0].setVisibility(false);
-  rootScientist[0].setVisibility(true);
+  rootScientist[0].setVisibility(false);
   currentCharacter = scientist;
   rootCurrentCharacter = rootScientist;
   ResetAnime(rootCurrentCharacter);
@@ -84,7 +87,7 @@ async function InitApp(canvas) {
   
   window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter));
   canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
-  SDK3DVerse.notifier.on('onFramePostRender', () => update(rootCurrentCharacter));
+  SDK3DVerse.notifier.on('onFramePostRender', () => update(rootCurrentCharacter, canvas));
 }
 
 async function ResetAnime(rootScientist){
@@ -221,7 +224,7 @@ async function deleteFPSCameraController(){
   SDK3DVerse.actionMap.values["LOOK_DOWN"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_Y_NEG"];
   SDK3DVerse.actionMap.values["LOOK_UP"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_Y_POS"];
   SDK3DVerse.actionMap.propagate();
-
+  
 };
 
 //------------------------------------------------------------------------------
@@ -262,24 +265,21 @@ async function checkKeyPressed(event, fresques, scientist, rootScientist){
   }
 
   if(event.key== "Escape"){
-    deleteFPSCameraController();
-  }
-
-  if(event.key=="c" && stepScientist ==-1){
-    ChangeCharacter(scientist);
+    document.getElementById("text-fresque").style.display = "none";
   }
 
 }
 
 
-async function ChangeCharacter(scientist){
+async function ChangeCharacter(character){
   const s = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
   const rS = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
 
   const c = await SDK3DVerse.engineAPI.findEntitiesByEUID('f2b4eac4-30a1-4cfa-8e07-6fad79d87f60');
   const rC = await SDK3DVerse.engineAPI.findEntitiesByEUID('3e168942-2b13-4495-b5a2-84602ff0df9a');
 
-  if(scientist[0].getEUID()== "bf3ff1b0-2b96-4482-839f-0e376ed76eed"){
+  if(character == "caveman"){
+
     currentCharacter = c;
     rootCurrentCharacter = rC;
     s[0].setVisibility(false);
@@ -287,6 +287,7 @@ async function ChangeCharacter(scientist){
     audioList = audioCaveman;
 
   }else{
+
     currentCharacter = s;
     rootCurrentCharacter = rS;
     c[0].setVisibility(false);
@@ -295,6 +296,28 @@ async function ChangeCharacter(scientist){
   }
   ResetAnime(rootCurrentCharacter);
 }
+
+
+// Fonction pour gérer le clic sur les images et les faire disparaître
+function handleImageClick(imageId) {
+  var image = document.getElementById(imageId);
+  if (image) {
+    image.style.display = "none";
+  }
+}
+
+// Ajout d'un gestionnaire d'événements pour chaque image
+document.getElementById("image1").addEventListener("click", function() {
+  handleImageClick("image1");
+  document.getElementById("home").style.display = "none";
+  ChangeCharacter("scientist");
+});
+
+document.getElementById("image2").addEventListener("click", function() {
+  handleImageClick("image2");
+  document.getElementById("home").style.display = "none";
+  ChangeCharacter("caveman");
+});
 
 async function changeStateTorch(){
   const torch = await SDK3DVerse.engineAPI.findEntitiesByEUID('bcc769ca-6cec-4c89-a8d7-bd408a3f4142');
@@ -365,10 +388,18 @@ async function detection(fresques, scientist, rootScientist){
             }
             else if (childrenFresque[i].components.debug_name.value == "Panneau.glb") {
               truePanneau = childrenFresque[i];
+
             }
           }
-  
+
+          var titleElement = document.querySelector('#text-fresque h2');
+          titleElement.innerText = 'Nouveau Titre';
+          var linkElement = document.querySelector('.text p');
+          linkElement.innerText = 'Nouveau Texte du lien';
+          
           truePanneau.setVisibility(!truePanneau.isVisible());
+          document.getElementById("text-fresque").style.display = "block";
+          deleteFPSCameraController();
   
         }  else if (fresque.getEUID() == fresqueFront[0].components.euid.value && dist >= 10){
           
@@ -394,8 +425,14 @@ async function rotation(pointA, pointB)
 }
 
 var lastTime = performance.now();
-async function update(scientist)
+async function update(scientist, canvas)
 {
+  //verification si la souris est lock pour désactiver le suivi de la caméra avec le curseur
+  if (document.pointerLockElement == null) {
+    deleteFPSCameraController();
+  }
+
+
   const deltaTime = performance.now() - lastTime;
   lastTime = performance.now();
   const scientistTransform = scientist[0].getGlobalTransform();

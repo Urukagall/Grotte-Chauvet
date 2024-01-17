@@ -29,33 +29,50 @@
         oncontextmenu="event.preventDefault()"
       ></canvas>
       <img id="loadingIcon" src="./Gif/loading.gif">
+      <div id="home">
+        <h2>La Grotte Chauvet</h2>
+        <h3>3DVerse</h3>
+        <div class="guide">
+          <img src="img/scientist.png" alt="Scientist" class="clickable-image" id="image1">
+          <img src="img/caveman.png" alt="Caveman" class="clickable-image" id="image2">
+        </div>
+        <div class="tuto-key">
+          <div class = "key">
+            <p>Intéraction Objet</p>
+            <img src="img/E.png" alt="Image E" >
+
+          </div>
+          <div class = "key">
+            <p>Lampe Torche</p>
+            <img src="img/F.png" alt="Image F" >
+
+          </div>
+          <div class = "key">
+            <p>Intéraction Guide</p>
+            <img src="img/R.png" alt="Image R" >
+
+          </div>
+        </div>
+      </div>
+      <div id="text-fresque" >
+        <h2>Fresque1</h2>
+        <div class="text-button">
+          <div class="text">
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam autem ratione nihil ab incidunt, obcaecati unde quisquam vitae omnis soluta voluptates ex placeat molestias perspiciatis, nemo sapiente sequi exercitationem consequatur!</p>
+          </div>
+
+        </div>
+
+      </div>
+
 
     </div>
-    <img src="https://example.com/image1.jpg" alt="Image 1" class="clickable-image" id="image1">
-    <img src="https://example.com/image2.jpg" alt="Image 2" class="clickable-image" id="image2">
+
   
     <!-- SDK 3DVERSE -->
     <script src="https://cdn.3dverse.com/legacy/sdk/stable/SDK3DVerse.js"></script>
 
-    <!-- JavaScript pour gérer le clic et masquer le carré -->
-    <script>
-      // Fonction pour gérer le clic sur les images et les faire disparaître
-      function handleImageClick(imageId) {
-        var image = document.getElementById(imageId);
-        if (image) {
-          image.style.display = "none";
-        }
-      }
-  
-      // Ajout d'un gestionnaire d'événements pour chaque image
-      document.getElementById("image1").addEventListener("click", function() {
-        handleImageClick("image1");
-      });
-  
-      document.getElementById("image2").addEventListener("click", function() {
-        handleImageClick("image2");
-      });
-    </script>
+
 
     <!-- APP ENTRYPOINT -->
     <script src="./main.js" type="module"></script>
