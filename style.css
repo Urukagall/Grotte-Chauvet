@@ -64,7 +64,7 @@ body {
   background-color: rgba(255, 255, 255, 0.479);
   width: 100%;
   height: 100%;
-
+  
 }
 
 h2 {
@@ -81,7 +81,7 @@ h3 {
 
 .guide {
   margin-top: 7%;
-
+  
 }
 
 .tuto-key{
@@ -105,6 +105,11 @@ h3 {
   font: bold;
 }
 
+@keyframes fadeIn {
+  0% { width: 0%; height: 0%; }
+  100% { width: 100%; height: 100%; }
+}
+
 #text-fresque{
   display: none;
   text-align: center;
@@ -112,6 +117,7 @@ h3 {
   background-color: rgba(255, 255, 255, 0.479);
   width: 100%;
   height: 100%;
+  animation: fadeIn 1s;
 }
 
 .text {

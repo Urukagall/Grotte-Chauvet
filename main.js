@@ -70,10 +70,10 @@ async function InitApp(canvas) {
 
   const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('854046a4-430c-4425-a777-d08d7d235046');
 
-  
 
   rootCaveman[0].setVisibility(false);
   rootScientist[0].setVisibility(false);
+
   currentCharacter = scientist;
   rootCurrentCharacter = rootScientist;
   ResetAnime(rootCurrentCharacter);
@@ -100,9 +100,92 @@ async function ResetAnime(rootScientist){
   rootScientist[0].setComponent("animation_controller", scientistAnime);
 }
 
+async function ChangeCharacter(character){
+  const rootScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
+  const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
+
+  const rootCaveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('3e168942-2b13-4495-b5a2-84602ff0df9a');
+  const caveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('3e168942-2b13-4495-b5a2-84602ff0df9a');
+  
+  const externCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('1d5657f0-9e9c-4364-b33e-28f1e448e351');
+  const internCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('7654171b-06da-4365-98b6-8b0c924f1945');
+
+  const panneau1 = await SDK3DVerse.engineAPI.findEntitiesByEUID('238add87-5d43-482b-8554-6e9d776064d6');
+  const panneau2 = await SDK3DVerse.engineAPI.findEntitiesByEUID('95c473b0-f684-48ab-96bd-7c4f2ee7ec87');
+  const panneau3 = await SDK3DVerse.engineAPI.findEntitiesByEUID('97ef8d38-a950-4bec-bc70-a2a62bfb536d');
+  const panneau4 = await SDK3DVerse.engineAPI.findEntitiesByEUID('ee0be6e1-2ab0-4e63-93e2-bb364d3611ab');
+
+  if(character == "caveman"){
+
+    rootCurrentCharacter = rootCaveMan;
+    currentCharacter = caveMan;
+    caveMan[0].setVisibility(true);
+    audioList = audioCaveman;
+    
+    panneau1[0].setVisibility(false);
+    panneau2[0].setVisibility(false);
+    panneau3[0].setVisibility(false);
+    panneau4[0].setVisibility(false);
+
+    internCollision[0].setGlobalTransform({
+      position : [0, 100, 0]
+    });
+
+    externCollision[0].setGlobalTransform({
+      position : [0, 0, 0]
+    });
+  }else{
+
+    rootCurrentCharacter = rootScientist;
+    currentCharacter = scientist;
+    scientist[0].setVisibility(true);
+    audioList = audioScientist;
+
+    panneau1[0].setVisibility(true);
+    panneau2[0].setVisibility(true);
+    panneau3[0].setVisibility(true);
+    panneau4[0].setVisibility(true);
+
+    externCollision[0].setGlobalTransform({
+      position : [0, 100, 0]
+    });
+
+    internCollision[0].setGlobalTransform({
+      position : [0, 0, 0]
+    });
+  }
+  ResetAnime(rootCurrentCharacter);
+}
+
+
+// Fonction pour gérer le clic sur les images et les faire disparaître
+function handleImageClick(imageId) {
+  var image = document.getElementById(imageId);
+  if (image) {
+    image.style.display = "none";
+  }
+}
+
+// Ajout d'un gestionnaire d'événements pour chaque image
+document.getElementById("image1").addEventListener("click", function() {
+  handleImageClick("image1");
+  document.getElementById("home").style.display = "none";
+  ChangeCharacter("scientist");
+});
+
+document.getElementById("image2").addEventListener("click", function() {
+  handleImageClick("image2");
+  document.getElementById("home").style.display = "none";
+  ChangeCharacter("caveman");
+});
+
 async function InitCol(){
   const debug = await SDK3DVerse.engineAPI.findEntitiesByEUID('618978eb-18b5-47dd-821e-067326e33fd6');
+  const externCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('1d5657f0-9e9c-4364-b33e-28f1e448e351');
+  const internCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('7654171b-06da-4365-98b6-8b0c924f1945');
   debug[0].setVisibility(false);
+  internCollision[0].setVisibility(false);
+  externCollision[0].setVisibility(false);
 }
 
 async function InitFresque(fresques){
@@ -255,11 +338,14 @@ async function onClick(event) {
   const clickedEntity = target.entity;
 }
 
-async function checkKeyPressed(event, fresques, scientist, rootScientist){
-  if(event.key== "r"){
-    detection(fresques, scientist, rootScientist);
+async function checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter){
+  if(event.key== "e"){
+    detectionFresque(fresques, currentCharacter);
   }
 
+  if(event.key== "r"){
+    detectionGuide(currentCharacter, rootCurrentCharacter);
+  }
   if(event.key== "f"){
     changeStateTorch();
   }
@@ -271,53 +357,7 @@ async function checkKeyPressed(event, fresques, scientist, rootScientist){
 }
 
 
-async function ChangeCharacter(character){
-  const s = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
-  const rS = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
 
-  const c = await SDK3DVerse.engineAPI.findEntitiesByEUID('f2b4eac4-30a1-4cfa-8e07-6fad79d87f60');
-  const rC = await SDK3DVerse.engineAPI.findEntitiesByEUID('3e168942-2b13-4495-b5a2-84602ff0df9a');
-
-  if(character == "caveman"){
-
-    currentCharacter = c;
-    rootCurrentCharacter = rC;
-    s[0].setVisibility(false);
-    c[0].setVisibility(true);
-    audioList = audioCaveman;
-
-  }else{
-
-    currentCharacter = s;
-    rootCurrentCharacter = rS;
-    c[0].setVisibility(false);
-    s[0].setVisibility(true);
-    audioList = audioScientist;
-  }
-  ResetAnime(rootCurrentCharacter);
-}
-
-
-// Fonction pour gérer le clic sur les images et les faire disparaître
-function handleImageClick(imageId) {
-  var image = document.getElementById(imageId);
-  if (image) {
-    image.style.display = "none";
-  }
-}
-
-// Ajout d'un gestionnaire d'événements pour chaque image
-document.getElementById("image1").addEventListener("click", function() {
-  handleImageClick("image1");
-  document.getElementById("home").style.display = "none";
-  ChangeCharacter("scientist");
-});
-
-document.getElementById("image2").addEventListener("click", function() {
-  handleImageClick("image2");
-  document.getElementById("home").style.display = "none";
-  ChangeCharacter("caveman");
-});
 
 async function changeStateTorch(){
   const torch = await SDK3DVerse.engineAPI.findEntitiesByEUID('bcc769ca-6cec-4c89-a8d7-bd408a3f4142');
@@ -331,86 +371,191 @@ async function changeStateTorch(){
   
 }
 
-async function detection(fresques, scientist, rootScientist){
-  const canvas = document.getElementById("display-canvas");
-  const rect   = canvas.getClientRects()[0];
-  var { entity, pickedPosition, pickedNormal } = await SDK3DVerse.engineAPI.castScreenSpaceRay(rect.x + rect.width / 2, rect.y + rect.height / 2, true, false);
-  const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
-
-
-
-  const posUser = await user[0].getTransform().position;
- 
-
-  if(entity){
-    const fresqueFront = entity.getAncestors();
-    
-    if(fresqueFront[0].components.euid.value == scientist[0].getEUID()){
-      if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15){
-        const scientistPosition = scientist[0].getGlobalTransform().position;
-        const scientistTransform = rootScientist[0].getGlobalTransform();
-        const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
-        if(dist<7){
-          if(!scientistTalk && stepScientist>=0){
-            const audio = audioList[stepAudio];
-            document.getElementById(audio).play();
-            scientistTalk = true;
-            
-          }else{
-            if(stepScientist!=0 && scientistTalk){
-              document.getElementById(audioList[stepAudio]).pause();
-              document.getElementById(audioList[stepAudio]).currentTime = 0;
-              stepAudio += 1;
-            }            
-            stepScientist += 1 ;
-
-            scientistTalk = false;
-            scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
-            rootScientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
+var trueFresque = 0;
+var distFresque = 4;
+async function detectionFresque(fresques, scientist){
   
-          }
+  const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
+  const posUser = await user[0].getTransform().position;
+  var posFresque;
+
+  if(document.getElementById("text-fresque").style.display == "block"){
+    document.getElementById("text-fresque").style.display = "none";
+  }else{
+
+    trueFresque = 0;
+    distFresque = 4;
+    await fresques.forEach(async function(fresque) {
+      const childrenFresque = await fresque.getChildren();
+      if(scientist[0].components.debug_name.value == "caveman"){
+        if(childrenFresque[1].components.debug_name.value == "fresque"){
+          posFresque = await childrenFresque[1].getGlobalTransform().position;
+        }else{
+          posFresque = await childrenFresque[0].getGlobalTransform().position;
+        }
+      }else{
+        if(childrenFresque[1].components.debug_name.value == "fresque"){
+          posFresque = await childrenFresque[0].getGlobalTransform().position;
+        }else{
+          posFresque = await childrenFresque[1].getGlobalTransform().position;
         }
       }
-    }else{
-      fresques.forEach(async function(fresque) {
-        const childrenFresque = await fresque.getChildren();
-        const posFresque = await childrenFresque[1].getGlobalTransform().position;
-        const dist = Math.sqrt( ((posFresque[0] - posUser[0]) **2 ) + ((posFresque[1] - posUser[1]) **2) + ((posFresque[2] - posUser[2]) **2));
 
-        var trueFresque = 0;
-        var truePanneau = 0;
+      const dist = Math.sqrt( ((posFresque[0] - posUser[0]) **2 ) + ((posFresque[1] - posUser[1]) **2) + ((posFresque[2] - posUser[2]) **2));
+      
+      console.log(dist);
 
-        if(fresque.getEUID() == fresqueFront[0].components.euid.value && dist < 10 ){
-          
-          for (let i = 0; i < 2; i++) {
-            if (childrenFresque[i].components.debug_name.value == "fresque") {
-              trueFresque = childrenFresque[i];
-            }
-            else if (childrenFresque[i].components.debug_name.value == "Panneau.glb") {
-              truePanneau = childrenFresque[i];
+      if( dist < 4 && dist < distFresque){
+        distFresque = dist;
+        trueFresque = fresque;
+        
+        TextFresque(trueFresque);
+      }
+    });
 
-            }
-          }
-
-          var titleElement = document.querySelector('#text-fresque h2');
-          titleElement.innerText = 'Nouveau Titre';
-          var linkElement = document.querySelector('.text p');
-          linkElement.innerText = 'Nouveau Texte du lien';
-          
-          truePanneau.setVisibility(!truePanneau.isVisible());
-          document.getElementById("text-fresque").style.display = "block";
-          deleteFPSCameraController();
-  
-        }  else if (fresque.getEUID() == fresqueFront[0].components.euid.value && dist >= 10){
-          
-          truePanneau.setVisibility(false);
-          
-        }
-      });
-    }
 
   }
 }
+
+async function TextFresque(fresque){
+
+  console.log(fresque.components.debug_name.value);
+
+  const name = fresque.components.debug_name.value;
+  console.log(name);
+
+  var titleElement = document.querySelector('#text-fresque h2');
+  var linkElement = document.querySelector('.text p');
+
+  if(name =="Bison"){
+    titleElement.innerText = 'Bison';
+    linkElement.innerText = 'Nouveau Texte du lien';
+  }else if(name =="Rhino"){
+    titleElement.innerText = 'Rhino';
+    linkElement.innerText = 'Nouveau Texte du lien';
+  }else if(name =="Lion"){
+    titleElement.innerText = 'Lion';
+    linkElement.innerText = 'Nouveau Texte du lien';
+  }else if(name =="Fresque"){
+    titleElement.innerText = 'Fresque';
+    linkElement.innerText = 'Nouveau Texte du lien';
+  }
+  
+  document.getElementById("text-fresque").style.display = "block";
+
+}
+
+async function detectionGuide(scientist, rootScientist){
+  const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
+  const posUser = await user[0].getTransform().position;
+ 
+  if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15){
+    const scientistPosition = scientist[0].getGlobalTransform().position;
+    const scientistTransform = rootScientist[0].getGlobalTransform();
+    const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
+    if(dist<2){
+      if(!scientistTalk && stepScientist>=0){
+        const audio = audioList[stepAudio];
+        document.getElementById(audio).play();
+        scientistTalk = true;
+        
+      }else{
+        if(stepScientist!=0 && scientistTalk){
+          document.getElementById(audioList[stepAudio]).pause();
+          document.getElementById(audioList[stepAudio]).currentTime = 0;
+          stepAudio += 1;
+        }            
+        stepScientist += 1 ;
+
+        scientistTalk = false;
+        scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
+        rootScientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
+
+      }
+    }
+  }
+}
+
+// async function detection(fresques, scientist, rootScientist){
+//   const canvas = document.getElementById("display-canvas");
+//   const rect   = canvas.getClientRects()[0];
+//   var { entity, pickedPosition, pickedNormal } = await SDK3DVerse.engineAPI.castScreenSpaceRay(rect.x + rect.width / 2, rect.y + rect.height / 2, true, false);
+//   const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
+
+
+
+//   const posUser = await user[0].getTransform().position;
+ 
+
+//   if(entity){
+//     const fresqueFront = entity.getAncestors();
+    
+//     if(fresqueFront[0].components.euid.value == scientist[0].getEUID()){
+//       if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15){
+//         const scientistPosition = scientist[0].getGlobalTransform().position;
+//         const scientistTransform = rootScientist[0].getGlobalTransform();
+//         const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
+//         if(dist<7){
+//           if(!scientistTalk && stepScientist>=0){
+//             const audio = audioList[stepAudio];
+//             document.getElementById(audio).play();
+//             scientistTalk = true;
+            
+//           }else{
+//             if(stepScientist!=0 && scientistTalk){
+//               document.getElementById(audioList[stepAudio]).pause();
+//               document.getElementById(audioList[stepAudio]).currentTime = 0;
+//               stepAudio += 1;
+//             }            
+//             stepScientist += 1 ;
+
+//             scientistTalk = false;
+//             scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
+//             rootScientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
+  
+//           }
+//         }
+//       }
+//     }else{
+//       fresques.forEach(async function(fresque) {
+//         const childrenFresque = await fresque.getChildren();
+//         const posFresque = await childrenFresque[1].getGlobalTransform().position;
+//         const dist = Math.sqrt( ((posFresque[0] - posUser[0]) **2 ) + ((posFresque[1] - posUser[1]) **2) + ((posFresque[2] - posUser[2]) **2));
+
+//         var trueFresque = 0;
+//         var truePanneau = 0;
+
+//         if(fresque.getEUID() == fresqueFront[0].components.euid.value && dist < 10 ){
+          
+//           for (let i = 0; i < 2; i++) {
+//             if (childrenFresque[i].components.debug_name.value == "fresque") {
+//               trueFresque = childrenFresque[i];
+//             }
+//             else if (childrenFresque[i].components.debug_name.value == "Panneau.glb") {
+//               truePanneau = childrenFresque[i];
+
+//             }
+//           }
+
+//           var titleElement = document.querySelector('#text-fresque h2');
+//           titleElement.innerText = 'Nouveau Titre';
+//           var linkElement = document.querySelector('.text p');
+//           linkElement.innerText = 'Nouveau Texte du lien';
+          
+//           truePanneau.setVisibility(!truePanneau.isVisible());
+//           document.getElementById("text-fresque").style.display = "block";
+//           deleteFPSCameraController();
+  
+//         }  else if (fresque.getEUID() == fresqueFront[0].components.euid.value && dist >= 10){
+          
+//           truePanneau.setVisibility(false);
+          
+//         }
+//       });
+//     }
+
+//   }
+// }
 
 async function rotation(pointA, pointB)
 {
@@ -478,6 +623,4 @@ async function update(scientist, canvas)
     position : scientistTransform.position,
     eulerOrientation : scientistTransform.eulerOrientation
   });
-}
-
-;
+};
