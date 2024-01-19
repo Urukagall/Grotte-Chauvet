@@ -66,7 +66,7 @@ async function InitApp(canvas) {
   const rootScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
 
   const caveman = await SDK3DVerse.engineAPI.findEntitiesByEUID('f2b4eac4-30a1-4cfa-8e07-6fad79d87f60');
-  const rootCaveman = await SDK3DVerse.engineAPI.findEntitiesByEUID('3e168942-2b13-4495-b5a2-84602ff0df9a');
+  const rootCaveman = await SDK3DVerse.engineAPI.findEntitiesByEUID('52f2ffda-aeff-4652-abc5-0e2a5b32b8b9');
 
   const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('854046a4-430c-4425-a777-d08d7d235046');
 
@@ -103,7 +103,7 @@ async function ChangeCharacter(character){
   const rootScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
   const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
 
-  const rootCaveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('3e168942-2b13-4495-b5a2-84602ff0df9a');
+  const rootCaveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('52f2ffda-aeff-4652-abc5-0e2a5b32b8b9');
   const caveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('f2b4eac4-30a1-4cfa-8e07-6fad79d87f60');
   
   const externCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('1d5657f0-9e9c-4364-b33e-28f1e448e351');
@@ -438,7 +438,6 @@ async function detectionFresque(fresques, scientist, canvas){
 
   if(document.getElementById("text-fresque").style.display == "block"){
     document.getElementById("text-fresque").style.display = "none";
-    setFPSCameraController(canvas);
     console.log("a");
   }else{
 
@@ -469,7 +468,6 @@ async function detectionFresque(fresques, scientist, canvas){
         trueFresque = fresque;
         
         TextFresque(trueFresque);
-        deleteFPSCameraController();
       }
     });
 
