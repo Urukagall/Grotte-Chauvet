@@ -21,7 +21,7 @@ var audioCaveman = ["Lion-2","Rhino-2","Lyon-2","Bison-2"];
 var stepAudio = 0;
 var currentCharacter;
 var rootCurrentCharacter;
-
+var numberFire = 0;
 
 SDK3DVerse.notifier.on('onAssetsLoadedChanged', (areAssetsLoaded) =>
 {
@@ -80,12 +80,11 @@ async function InitApp(canvas) {
 
   const fresques = await allFresques[0].getChildren();
   InitFresque(fresques);
-  InitVector();
   InitCol();
-
+  // SetFire();
   await InitFirstPersonController(characterControllerSceneUUID);
   
-  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter));
+  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter, canvas));
   canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
   SDK3DVerse.notifier.on('onFramePostRender', () => update(rootCurrentCharacter, canvas));
 }
@@ -105,7 +104,7 @@ async function ChangeCharacter(character){
   const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
 
   const rootCaveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('3e168942-2b13-4495-b5a2-84602ff0df9a');
-  const caveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('3e168942-2b13-4495-b5a2-84602ff0df9a');
+  const caveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('f2b4eac4-30a1-4cfa-8e07-6fad79d87f60');
   
   const externCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('1d5657f0-9e9c-4364-b33e-28f1e448e351');
   const internCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('7654171b-06da-4365-98b6-8b0c924f1945');
@@ -115,11 +114,19 @@ async function ChangeCharacter(character){
   const panneau3 = await SDK3DVerse.engineAPI.findEntitiesByEUID('97ef8d38-a950-4bec-bc70-a2a62bfb536d');
   const panneau4 = await SDK3DVerse.engineAPI.findEntitiesByEUID('ee0be6e1-2ab0-4e63-93e2-bb364d3611ab');
 
+  const pointListCaveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('06e8ba40-27d4-4018-8bcd-ef1a122ee407');
+  const pointListScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('eb4d7ab6-113d-4148-b2d1-43ddbc056291');
+  const listFire = await SDK3DVerse.engineAPI.findEntitiesByEUID('db89ed9c-eb11-4974-8aae-d062753269ae');
+  const listLed = await SDK3DVerse.engineAPI.findEntitiesByEUID('67abe046-cf07-4f66-9a22-7c671702571c');
+  
   if(character == "caveman"){
+    InitVector(pointListCaveMan);
 
+    listFire[0].setVisibility(true);
+    listLed[0].setVisibility(false);
     rootCurrentCharacter = rootCaveMan;
     currentCharacter = caveMan;
-    caveMan[0].setVisibility(true);
+    rootCaveMan[0].setVisibility(true);
     audioList = audioCaveman;
     
     panneau1[0].setVisibility(false);
@@ -135,10 +142,14 @@ async function ChangeCharacter(character){
       position : [0, 0, 0]
     });
   }else{
+    InitVector(pointListScientist);
+
+    listFire[0].setVisibility(false);
+    listLed[0].setVisibility(true);
 
     rootCurrentCharacter = rootScientist;
     currentCharacter = scientist;
-    scientist[0].setVisibility(true);
+    rootScientist[0].setVisibility(true);
     audioList = audioScientist;
 
     panneau1[0].setVisibility(true);
@@ -156,6 +167,64 @@ async function ChangeCharacter(character){
   }
   ResetAnime(rootCurrentCharacter);
 }
+
+// async function SetFire(){
+//   if(numberFire == 0){
+//     const fire1 = await SDK3DVerse.engineAPI.findEntitiesByEUID('906964f1-52d3-4b63-8af6-7ebf245d4468');
+//     const aura1 = await fire1[0].getChildren();
+//     const fire2 = await SDK3DVerse.engineAPI.findEntitiesByEUID('39957872-174c-43e1-b219-96521c3bd652');
+//     const aura2 = await fire2[0].getChildren();
+//     const fire3 = await SDK3DVerse.engineAPI.findEntitiesByEUID('f201999b-5a5e-4e77-bef6-0e578e37abf3');
+//     const aura3 = await fire3[0].getChildren();
+//     const fire4 = await SDK3DVerse.engineAPI.findEntitiesByEUID('af14e22d-17fc-4b39-848f-380dca5bb757');
+//     const aura4 = await fire4[0].getChildren();
+
+
+//     for (let i = 0; i < 2; i++) {
+//       if (aura1[i].components.debug_name.value == "Aura") {
+        
+//         aura1[i].setComponent('point_light', { intensity: 0 });
+//       }
+
+//       if (aura2[i].components.debug_name.value == "Aura") {
+        
+//         aura2[i].setComponent('point_light', { intensity: 0 });
+//       }
+
+//       if (aura3[i].components.debug_name.value == "Aura") {
+        
+//         aura3[i].setComponent('point_light', { intensity: 0 });
+//       }
+
+//       if (aura4[i].components.debug_name.value == "Aura") {
+        
+//         aura4[i].setComponent('point_light', { intensity: 0 });
+//       }
+//     }
+//   }else if(numberFire == 1){
+//     console.log("a");
+//     const fire1 = await SDK3DVerse.engineAPI.findEntitiesByEUID('906964f1-52d3-4b63-8af6-7ebf245d4468');
+//     const aura1 = await fire1[0].getChildren();
+//     for (let i = 0; i < 2; i++) {
+//       if (aura1[i].components.debug_name.value == "Aura") {
+        
+//         aura1[i].setComponent('point_light', { intensity: 0.2 });
+//       }
+//     }
+//   }else if(numberFire == 2){
+//     console.log("b");
+//     const fire2 = await SDK3DVerse.engineAPI.findEntitiesByEUID('39957872-174c-43e1-b219-96521c3bd652');
+//     const aura2 = await fire2[0].getChildren();
+//     for (let i = 0; i < 2; i++) {
+//       if (aura2[i].components.debug_name.value == "Aura") {
+        
+//         aura2[i].setComponent('point_light', { intensity: 0.2 });
+//       }
+//     }
+//   }
+
+//   numberFire += 1;
+// }
 
 
 // Fonction pour gérer le clic sur les images et les faire disparaître
@@ -202,48 +271,32 @@ async function InitFresque(fresques){
   });
 }
 
-async function InitVector(){
-  // const pointList = await SDK3DVerse.engineAPI.findEntitiesByEUID('ea10f940-5832-4b01-a167-00ef00bfefe1');
-  const pointList = await SDK3DVerse.engineAPI.findEntitiesByEUID('eb4d7ab6-113d-4148-b2d1-43ddbc056291');
+async function InitVector(pointList){
   const childrenList = await pointList[0].getChildren();
   const sizeChildrenList = childrenList.length;
+
+  var trueChildrenList = [];
+
+  for (let i = 0; i < sizeChildrenList; i++) {
+    for (let j = 0; j < sizeChildrenList; j++) {
+      if (childrenList[j].components.debug_name.value == (i+1).toString()) {
+        trueChildrenList.push(childrenList[j])
+        pointPosition.push(childrenList[j].getGlobalTransform().position)
+      }
+    }
+    
+  }
 
   for (let i = 0; i < sizeChildrenList - 1; i++) {
 
     var pointA = [0,0,0]
     var pointB = [0,0,0]
 
-    // pointA = childrenList[i].getGlobalTransform().position;
-    // pointB = childrenList[i + 1].getGlobalTransform().position;
-    for (let j = 0; j < sizeChildrenList; j++) {
-
-      if (pointList[0].children[i] == childrenList[j].rtid) {
-        pointA = childrenList[j].getGlobalTransform().position;
-      }
-
-      else if (pointList[0].children[i + 1] == childrenList[j].rtid) {
-        
-        pointB = childrenList[j].getGlobalTransform().position;
-      }
-
-    }
+    pointA = trueChildrenList[i].getGlobalTransform().position;
+    pointB = trueChildrenList[i+1].getGlobalTransform().position;
     await Vector(pointA, pointB);
   }
-  for (let i = 0; i < sizeChildrenList ; i++) {
-
-    // const pos = childrenList[i].getGlobalTransform().position;
-    // pointPosition.push(pos);
-
-    for (let j = 0; j < sizeChildrenList; j++) {
-
-      if (pointList[0].children[i] == childrenList[j].rtid) {
-        const pos = childrenList[j].getGlobalTransform().position;
-        pointPosition.push(pos);
-      }
-
-    }
-
-  }
+  
 }
 
 async function Vector(a , b){
@@ -308,6 +361,10 @@ async function deleteFPSCameraController(){
   SDK3DVerse.actionMap.values["LOOK_UP"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_Y_POS"];
   SDK3DVerse.actionMap.propagate();
   
+  if (document.pointerLockElement || document.mozPointerLockElement || document.webkitPointerLockElement) {
+    document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock || document.webkitExitPointerLock;
+    document.exitPointerLock();
+  }
 };
 
 //------------------------------------------------------------------------------
@@ -338,9 +395,9 @@ async function onClick(event) {
   const clickedEntity = target.entity;
 }
 
-async function checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter){
+async function checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter, canvas){
   if(event.key== "e"){
-    detectionFresque(fresques, currentCharacter);
+    detectionFresque(fresques, currentCharacter, canvas);
   }
 
   if(event.key== "r"){
@@ -361,19 +418,19 @@ async function checkKeyPressed(event, fresques, currentCharacter, rootCurrentCha
 
 async function changeStateTorch(){
   const torch = await SDK3DVerse.engineAPI.findEntitiesByEUID('bcc769ca-6cec-4c89-a8d7-bd408a3f4142');
-  if(torch[0].components.point_light.intensity == 10) {
+  if(torch[0].components.point_light.intensity == 1) {
     torch[0].setComponent('point_light', { intensity: 0 });
   }
   
   else {
-    torch[0].setComponent('point_light', { intensity: 10 });
+    torch[0].setComponent('point_light', { intensity: 1 });
   }
   
 }
 
 var trueFresque = 0;
 var distFresque = 4;
-async function detectionFresque(fresques, scientist){
+async function detectionFresque(fresques, scientist, canvas){
   
   const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
   const posUser = await user[0].getTransform().position;
@@ -381,6 +438,8 @@ async function detectionFresque(fresques, scientist){
 
   if(document.getElementById("text-fresque").style.display == "block"){
     document.getElementById("text-fresque").style.display = "none";
+    setFPSCameraController(canvas);
+    console.log("a");
   }else{
 
     trueFresque = 0;
@@ -410,6 +469,7 @@ async function detectionFresque(fresques, scientist){
         trueFresque = fresque;
         
         TextFresque(trueFresque);
+        deleteFPSCameraController();
       }
     });
 
@@ -458,6 +518,7 @@ async function detectionGuide(scientist, rootScientist){
         const audio = audioList[stepAudio];
         document.getElementById(audio).play();
         scientistTalk = true;
+
         
       }else{
         if(stepScientist!=0 && scientistTalk){
@@ -581,8 +642,8 @@ async function update(scientist, canvas)
   const deltaTime = performance.now() - lastTime;
   lastTime = performance.now();
   const scientistTransform = scientist[0].getGlobalTransform();
-  var scientistAnime = scientist[0].getComponent('animation_controller').dataJSON;
-  if (listVector.length > stepScientist) {
+  var scientistAnime = scientist[0].getComponent('animation_controller').dataJSON; 
+  if (listVector.length > stepScientist && listVector.length != 0) {
 
     const dist = Math.sqrt( ((pointPosition[stepScientist + 1][0] - scientistTransform.position[0]) **2 ) + ((pointPosition[stepScientist + 1][1] - scientistTransform.position[1]) **2) + ((pointPosition[stepScientist + 1][2] - scientistTransform.position[2]) **2));
     
