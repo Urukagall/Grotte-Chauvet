@@ -70,7 +70,6 @@ async function InitApp(canvas) {
 
   const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('854046a4-430c-4425-a777-d08d7d235046');
 
-
   rootCaveman[0].setVisibility(false);
   rootScientist[0].setVisibility(false);
 
@@ -83,10 +82,12 @@ async function InitApp(canvas) {
   InitCol();
   // SetFire();
   await InitFirstPersonController(characterControllerSceneUUID);
-  
+
   window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter, canvas));
   canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
   SDK3DVerse.notifier.on('onFramePostRender', () => update(rootCurrentCharacter, canvas));
+  const user = await SDK3DVerse.engineAPI.findEntitiesByEUID('fd8101ca-42e5-48c6-aed2-2aa0e8a97cb1');
+  user[0].setVisibility(false);
 }
 
 async function ResetAnime(rootScientist){
@@ -168,85 +169,48 @@ async function ChangeCharacter(character){
   ResetAnime(rootCurrentCharacter);
 }
 
-// async function SetFire(){
-//   if(numberFire == 0){
-//     const fire1 = await SDK3DVerse.engineAPI.findEntitiesByEUID('906964f1-52d3-4b63-8af6-7ebf245d4468');
-//     const aura1 = await fire1[0].getChildren();
-//     const fire2 = await SDK3DVerse.engineAPI.findEntitiesByEUID('39957872-174c-43e1-b219-96521c3bd652');
-//     const aura2 = await fire2[0].getChildren();
-//     const fire3 = await SDK3DVerse.engineAPI.findEntitiesByEUID('f201999b-5a5e-4e77-bef6-0e578e37abf3');
-//     const aura3 = await fire3[0].getChildren();
-//     const fire4 = await SDK3DVerse.engineAPI.findEntitiesByEUID('af14e22d-17fc-4b39-848f-380dca5bb757');
-//     const aura4 = await fire4[0].getChildren();
 
 
-//     for (let i = 0; i < 2; i++) {
-//       if (aura1[i].components.debug_name.value == "Aura") {
-        
-//         aura1[i].setComponent('point_light', { intensity: 0 });
-//       }
+function startChronometer(duration) {
+  let timer = duration, minutes, seconds;
+  const chronometerElement = document.getElementById('chrono');
+  setInterval(function () {
+      minutes = parseInt(timer / 60, 10);
+      seconds = parseInt(timer % 60, 10);
 
-//       if (aura2[i].components.debug_name.value == "Aura") {
-        
-//         aura2[i].setComponent('point_light', { intensity: 0 });
-//       }
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      seconds = seconds < 10 ? "0" + seconds : seconds;
+      chronometerElement.textContent = minutes + ":" + seconds;
+      console.log(minutes + ":" + seconds);
 
-//       if (aura3[i].components.debug_name.value == "Aura") {
-        
-//         aura3[i].setComponent('point_light', { intensity: 0 });
-//       }
-
-//       if (aura4[i].components.debug_name.value == "Aura") {
-        
-//         aura4[i].setComponent('point_light', { intensity: 0 });
-//       }
-//     }
-//   }else if(numberFire == 1){
-//     console.log("a");
-//     const fire1 = await SDK3DVerse.engineAPI.findEntitiesByEUID('906964f1-52d3-4b63-8af6-7ebf245d4468');
-//     const aura1 = await fire1[0].getChildren();
-//     for (let i = 0; i < 2; i++) {
-//       if (aura1[i].components.debug_name.value == "Aura") {
-        
-//         aura1[i].setComponent('point_light', { intensity: 0.2 });
-//       }
-//     }
-//   }else if(numberFire == 2){
-//     console.log("b");
-//     const fire2 = await SDK3DVerse.engineAPI.findEntitiesByEUID('39957872-174c-43e1-b219-96521c3bd652');
-//     const aura2 = await fire2[0].getChildren();
-//     for (let i = 0; i < 2; i++) {
-//       if (aura2[i].components.debug_name.value == "Aura") {
-        
-//         aura2[i].setComponent('point_light', { intensity: 0.2 });
-//       }
-//     }
-//   }
-
-//   numberFire += 1;
-// }
-
-
-// Fonction pour gérer le clic sur les images et les faire disparaître
-function handleImageClick(imageId) {
-  var image = document.getElementById(imageId);
-  if (image) {
-    image.style.display = "none";
-  }
+      if (--timer < 0) {
+          console.log("Temps écoulé!");
+          chronometerElement.textContent = "Temps écoulé!";
+          document.getElementById("finish").style.display = "block";
+          document.getElementById("chrono").style.display = "none";
+          const canvas = document.getElementById("display-canvas");
+          deleteFPSCameraController(canvas);
+          clearInterval();
+      }
+  }, 1000);
 }
 
 // Ajout d'un gestionnaire d'événements pour chaque image
 document.getElementById("image1").addEventListener("click", function() {
-  handleImageClick("image1");
   document.getElementById("home").style.display = "none";
   ChangeCharacter("scientist");
+  document.getElementById("chrono").style.display = "block";
+  startChronometer(2 * 60 + 30);
 });
 
 document.getElementById("image2").addEventListener("click", function() {
-  handleImageClick("image2");
   document.getElementById("home").style.display = "none";
   ChangeCharacter("caveman");
+  document.getElementById("chrono").style.display = "block";
+  startChronometer(2 * 60 + 30);
+  
 });
+
 
 async function InitCol(){
   const debug = await SDK3DVerse.engineAPI.findEntitiesByEUID('618978eb-18b5-47dd-821e-067326e33fd6');
@@ -535,86 +499,6 @@ async function detectionGuide(scientist, rootScientist){
   }
 }
 
-// async function detection(fresques, scientist, rootScientist){
-//   const canvas = document.getElementById("display-canvas");
-//   const rect   = canvas.getClientRects()[0];
-//   var { entity, pickedPosition, pickedNormal } = await SDK3DVerse.engineAPI.castScreenSpaceRay(rect.x + rect.width / 2, rect.y + rect.height / 2, true, false);
-//   const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
-
-
-
-//   const posUser = await user[0].getTransform().position;
- 
-
-//   if(entity){
-//     const fresqueFront = entity.getAncestors();
-    
-//     if(fresqueFront[0].components.euid.value == scientist[0].getEUID()){
-//       if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15){
-//         const scientistPosition = scientist[0].getGlobalTransform().position;
-//         const scientistTransform = rootScientist[0].getGlobalTransform();
-//         const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
-//         if(dist<7){
-//           if(!scientistTalk && stepScientist>=0){
-//             const audio = audioList[stepAudio];
-//             document.getElementById(audio).play();
-//             scientistTalk = true;
-            
-//           }else{
-//             if(stepScientist!=0 && scientistTalk){
-//               document.getElementById(audioList[stepAudio]).pause();
-//               document.getElementById(audioList[stepAudio]).currentTime = 0;
-//               stepAudio += 1;
-//             }            
-//             stepScientist += 1 ;
-
-//             scientistTalk = false;
-//             scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
-//             rootScientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
-  
-//           }
-//         }
-//       }
-//     }else{
-//       fresques.forEach(async function(fresque) {
-//         const childrenFresque = await fresque.getChildren();
-//         const posFresque = await childrenFresque[1].getGlobalTransform().position;
-//         const dist = Math.sqrt( ((posFresque[0] - posUser[0]) **2 ) + ((posFresque[1] - posUser[1]) **2) + ((posFresque[2] - posUser[2]) **2));
-
-//         var trueFresque = 0;
-//         var truePanneau = 0;
-
-//         if(fresque.getEUID() == fresqueFront[0].components.euid.value && dist < 10 ){
-          
-//           for (let i = 0; i < 2; i++) {
-//             if (childrenFresque[i].components.debug_name.value == "fresque") {
-//               trueFresque = childrenFresque[i];
-//             }
-//             else if (childrenFresque[i].components.debug_name.value == "Panneau.glb") {
-//               truePanneau = childrenFresque[i];
-
-//             }
-//           }
-
-//           var titleElement = document.querySelector('#text-fresque h2');
-//           titleElement.innerText = 'Nouveau Titre';
-//           var linkElement = document.querySelector('.text p');
-//           linkElement.innerText = 'Nouveau Texte du lien';
-          
-//           truePanneau.setVisibility(!truePanneau.isVisible());
-//           document.getElementById("text-fresque").style.display = "block";
-//           deleteFPSCameraController();
-  
-//         }  else if (fresque.getEUID() == fresqueFront[0].components.euid.value && dist >= 10){
-          
-//           truePanneau.setVisibility(false);
-          
-//         }
-//       });
-//     }
-
-//   }
-// }
 
 async function rotation(pointA, pointB)
 {
