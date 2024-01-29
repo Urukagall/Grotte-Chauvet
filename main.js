@@ -2,6 +2,8 @@
 import {
   publicToken,
   mainSceneUUID,
+  caveSceneUUID,
+  caveLinkerEntityName,
   characterControllerSceneUUID,
 } from "./config.js";
 
@@ -11,83 +13,160 @@ window.addEventListener("load", () => {
   InitApp(canvas);
 });
 
-var listVector = [];
-var stepScientist = -1;
-var scientistTalk = false;
-var pointPosition = [];
-var audioList = [];
-var audioScientist = ["Lion","Rhino","Lyon","Bison"];
-var audioCaveman = ["Lion-2","Rhino-2","Lyon-2","Bison-2"];
-var stepAudio = 0;
-var currentCharacter;
-var rootCurrentCharacter;
-var numberFire = 0;
+let listVector = [];
+let stepScientist = -1;
+let scientistTalk = false;
+let pointPosition = [];
+let audioList = [];
+let audioScientist = ["Lion","Rhino","Lyon","Bison"];
+let audioCaveman = ["Lion-2","Rhino-2","Lyon-2","Bison-2"];
+let stepAudio = 0;
+let currentCharacter;
+let rootCurrentCharacter;
+let caveSceneEntity;
+let fresques;
+let numberFire = 0;
+let mainSceneLoadedResolve;
+let mainSceneLoadedPromise = new Promise(resolve => { mainSceneLoadedResolve = resolve; });
 
+// SEB: No idea why you did that but the listener is actually never called because all listeners
+//      are removed from SDK3DVerse.notifier once you call SDK3DVerse.joinOrStartSession.
+//      Also this listener seems very weird!
+/*
 SDK3DVerse.notifier.on('onAssetsLoadedChanged', (areAssetsLoaded) =>
 {
   console.log('areAssetsLoaded', areAssetsLoaded);
   if (areAssetsLoaded) {
     console.log('areAssetsLoaded', areAssetsLoaded);
-    
+
     const element = document.getElementById("id1");
     element.innerHTML="<canvas id='display-canvas' class='display-canvas' tabindex='1' oncontextmenu='event.preventDefault()'></canvas>";
 
     document.getElementById("display-canvas").style.display = "none";
     document.getElementById("home").style.display = "block";
-
-    
   }
   else{
     document.getElementById("display-canvas").style.display = "none";
-
   }
 });
-
-
+*/
 //------------------------------------------------------------------------------
 async function InitApp(canvas) {
-  await SDK3DVerse.joinOrStartSession({
+  // hide canvas until main assets are loaded
+  canvas.style.display = "none";
+
+  const isSessionCreator = await SDK3DVerse.joinOrStartSession({
     userToken: publicToken,
     sceneUUID: mainSceneUUID,
     canvas: canvas,
-    createDefaultCamera: false,
-    startSimulation: "on-assets-loaded",
+    // We need a camera for the engine to start loading assets, otherwise it consider nothing
+    // has to be rendered so nothing loads
+    createDefaultCamera: true,
+    isTransient : true
+    // Using this will await all assets to be loaded before resolving the joinOrStartSession
+    // promise, which means non creator user will have to wait all the cave assets to be loaded
+    // before being able to go furher and isntantiate their avatar. We do not want that.
+    //startSimulation: "on-assets-loaded",
   });
-  
+
+  if(isSessionCreator) {
+    console.log("Session created => wait for main scene loading");
+    // Since we are the session creator, we can wait for the main scene to be loaded before popping our avatar.
+    SDK3DVerse.notifier.on('onAssetsLoadedChanged', onMainSceneLoaded);
+    await mainSceneLoadedPromise;
+  }
+  else {
+    console.log("Session joined => wait a few seconds before popping our avatar");
+    // Since we're not the session creator we cannot know if the main scene is fully loaded or not.
+    // So we'll just wait a few seconds to be sure the floor assets have been loaded before popping our avatar.
+    // Just in case we are joining while the floor is still loading.
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  }
+
+  // Start the simulation anyway: we created the session, we did not create the session...
+  await attachCaveScene();
+  SDK3DVerse.engineAPI.startSimulation();
+
   document.getElementById("loadingIcon").style.display = "none";
-
   document.getElementById("home").style.display = "block";
-
-
   //document.getElementById("Grotte").play();
 
+  await InitFirstPersonController(characterControllerSceneUUID);
 
+  // hide NPC and player
+  // SEB watch out: if you are multi players then you have to sync the game state among all the players
+  // e.g the selection of the guide NPC character
+  await initGameState();
+
+  canvas.style.display = "block";
+
+  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter));
+  canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
+  SDK3DVerse.notifier.on('onFramePostRender', () => update(rootCurrentCharacter, canvas));
+}
+
+async function initGameState() {
   const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
   const rootScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
 
-  const caveman = await SDK3DVerse.engineAPI.findEntitiesByEUID('f2b4eac4-30a1-4cfa-8e07-6fad79d87f60');
+  //const caveman = await SDK3DVerse.engineAPI.findEntitiesByEUID('f2b4eac4-30a1-4cfa-8e07-6fad79d87f60');
   const rootCaveman = await SDK3DVerse.engineAPI.findEntitiesByEUID('52f2ffda-aeff-4652-abc5-0e2a5b32b8b9');
 
   const allFresques = await SDK3DVerse.engineAPI.findEntitiesByEUID('854046a4-430c-4425-a777-d08d7d235046');
 
+  currentCharacter = scientist;
+  rootCurrentCharacter = rootScientist;
+  // SEB watch out: for some reason rese the anim controller makes the character visible again
+  // while its visible state in the scene graph remains hidden.
+  // So one should set the visibility after ResetAnim.
+  ResetAnime(rootCurrentCharacter);
+
   rootCaveman[0].setVisibility(false);
   rootScientist[0].setVisibility(false);
 
-  currentCharacter = scientist;
-  rootCurrentCharacter = rootScientist;
-  ResetAnime(rootCurrentCharacter);
-
-  const fresques = await allFresques[0].getChildren();
+  fresques = await allFresques[0].getChildren();
   InitFresque(fresques);
   InitCol();
   // SetFire();
-  await InitFirstPersonController(characterControllerSceneUUID);
 
-  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter, canvas));
-  canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
-  SDK3DVerse.notifier.on('onFramePostRender', () => update(rootCurrentCharacter, canvas));
   const user = await SDK3DVerse.engineAPI.findEntitiesByEUID('fd8101ca-42e5-48c6-aed2-2aa0e8a97cb1');
   user[0].setVisibility(false);
+}
+
+function onMainSceneLoaded(areAssetsLoaded) {
+  if(!areAssetsLoaded) {
+    return;
+  }
+  SDK3DVerse.notifier.off('onAssetsLoadedChanged', onMainSceneLoaded);
+  console.log("Main scene is fully loaded");
+  mainSceneLoadedResolve();
+}
+
+async function attachCaveScene() {
+  // Attach the cave scene
+  const entities = await SDK3DVerse.engineAPI.findEntitiesByNames(caveLinkerEntityName);
+  caveSceneEntity = entities[0];
+  if(!caveSceneEntity) {
+    console.error("Could not find cave linker entity");
+    return;
+  }
+
+  if(caveSceneEntity.getComponent('scene_ref').value === caveSceneUUID) {
+    console.error("Cave scene already attached");
+    return;
+  }
+
+  caveSceneEntity.setComponent("scene_ref", { value: caveSceneUUID });
+  SDK3DVerse.notifier.on('onAssetsLoadedChanged', onCaveSceneLoaded);
+  caveSceneEntity.save();
+}
+
+async function onCaveSceneLoaded(areAssetsLoaded) {
+  if(!areAssetsLoaded) {
+    return;
+  }
+  SDK3DVerse.notifier.off('onAssetsLoadedChanged', onCaveSceneLoaded);
+  console.log("Cave scene is fully loaded");
 }
 
 async function ResetAnime(rootScientist){
