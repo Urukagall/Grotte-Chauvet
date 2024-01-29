@@ -64,7 +64,7 @@ body {
   background-color: rgba(255, 255, 255, 0.479);
   width: 100%;
   height: 100%;
-  
+
 }
 
 h2 {
@@ -81,11 +81,11 @@ h3 {
 
 .guide {
   margin-top: 7%;
-  
+
 }
 
 .tuto-key{
-  margin-top: 5%;
+  margin-top: 1rem;
   display: flex;
   justify-content: center;
 }
@@ -152,9 +152,9 @@ h3 {
 }
 
 .text {
-  border: 2px solid black; 
-  border-radius: 10px; 
-  padding: 3%; 
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 3%;
   width: 50%;
   margin-right: 10%;
   font-size: 20px;
