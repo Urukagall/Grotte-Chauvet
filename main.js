@@ -13,6 +13,7 @@ window.addEventListener("load", () => {
   InitApp(canvas);
 });
 
+//------------------------------------------------------------------------------
 let listVector = [];
 let stepScientist = -1;
 let scientistTalk = false;
@@ -29,6 +30,7 @@ let numberFire = 0;
 let mainSceneLoadedResolve;
 let mainSceneLoadedPromise = new Promise(resolve => { mainSceneLoadedResolve = resolve; });
 
+//------------------------------------------------------------------------------
 // SEB: No idea why you did that but the listener is actually never called because all listeners
 //      are removed from SDK3DVerse.notifier once you call SDK3DVerse.joinOrStartSession.
 //      Also this listener seems very weird!
@@ -50,6 +52,7 @@ SDK3DVerse.notifier.on('onAssetsLoadedChanged', (areAssetsLoaded) =>
   }
 });
 */
+
 //------------------------------------------------------------------------------
 async function InitApp(canvas) {
   // hide canvas until main assets are loaded
@@ -91,6 +94,21 @@ async function InitApp(canvas) {
   document.getElementById("home").style.display = "block";
   //document.getElementById("Grotte").play();
 
+  // Ajout d'un gestionnaire d'événements pour chaque image
+  document.getElementById("image1").addEventListener("click", function() {
+    document.getElementById("home").style.display = "none";
+    ChangeCharacter("scientist");
+    document.getElementById("chrono").style.display = "block";
+    startChronometer(2 * 60 + 30);
+  });
+
+  document.getElementById("image2").addEventListener("click", function() {
+    document.getElementById("home").style.display = "none";
+    ChangeCharacter("caveman");
+    document.getElementById("chrono").style.display = "block";
+    startChronometer(2 * 60 + 30);
+  });
+
   await InitFirstPersonController(characterControllerSceneUUID);
 
   // hide NPC and player
@@ -105,6 +123,7 @@ async function InitApp(canvas) {
   SDK3DVerse.notifier.on('onFramePostRender', () => update(rootCurrentCharacter, canvas));
 }
 
+//------------------------------------------------------------------------------
 async function initGameState() {
   const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
   const rootScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
@@ -133,6 +152,7 @@ async function initGameState() {
   user[0].setVisibility(false);
 }
 
+//------------------------------------------------------------------------------
 function onMainSceneLoaded(areAssetsLoaded) {
   if(!areAssetsLoaded) {
     return;
@@ -142,6 +162,7 @@ function onMainSceneLoaded(areAssetsLoaded) {
   mainSceneLoadedResolve();
 }
 
+//------------------------------------------------------------------------------
 async function attachCaveScene() {
   // Attach the cave scene
   const entities = await SDK3DVerse.engineAPI.findEntitiesByNames(caveLinkerEntityName);
@@ -161,6 +182,7 @@ async function attachCaveScene() {
   caveSceneEntity.save();
 }
 
+//------------------------------------------------------------------------------
 async function onCaveSceneLoaded(areAssetsLoaded) {
   if(!areAssetsLoaded) {
     return;
@@ -169,8 +191,9 @@ async function onCaveSceneLoaded(areAssetsLoaded) {
   console.log("Cave scene is fully loaded");
 }
 
-async function ResetAnime(rootScientist){
-  var scientistAnime = rootScientist[0].getComponent('animation_controller').dataJSON;
+//------------------------------------------------------------------------------
+async function ResetAnime(rootScientist) {
+  const scientistAnime = rootScientist[0].getComponent('animation_controller').dataJSON;
 
   scientistAnime.Standing = true;
   scientistAnime.Walking = false;
@@ -179,13 +202,14 @@ async function ResetAnime(rootScientist){
   rootScientist[0].setComponent("animation_controller", scientistAnime);
 }
 
-async function ChangeCharacter(character){
+//------------------------------------------------------------------------------
+async function ChangeCharacter(character) {
   const rootScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
   const scientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('bf3ff1b0-2b96-4482-839f-0e376ed76eed');
 
   const rootCaveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('52f2ffda-aeff-4652-abc5-0e2a5b32b8b9');
   const caveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('f2b4eac4-30a1-4cfa-8e07-6fad79d87f60');
-  
+
   const externCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('1d5657f0-9e9c-4364-b33e-28f1e448e351');
   const internCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('7654171b-06da-4365-98b6-8b0c924f1945');
 
@@ -198,7 +222,7 @@ async function ChangeCharacter(character){
   const pointListScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('eb4d7ab6-113d-4148-b2d1-43ddbc056291');
   const listFire = await SDK3DVerse.engineAPI.findEntitiesByEUID('db89ed9c-eb11-4974-8aae-d062753269ae');
   const listLed = await SDK3DVerse.engineAPI.findEntitiesByEUID('67abe046-cf07-4f66-9a22-7c671702571c');
-  
+
   if(character == "caveman"){
     InitVector(pointListCaveMan);
 
@@ -208,7 +232,7 @@ async function ChangeCharacter(character){
     currentCharacter = caveMan;
     rootCaveMan[0].setVisibility(true);
     audioList = audioCaveman;
-    
+
     panneau1[0].setVisibility(false);
     panneau2[0].setVisibility(false);
     panneau3[0].setVisibility(false);
@@ -221,7 +245,8 @@ async function ChangeCharacter(character){
     externCollision[0].setGlobalTransform({
       position : [0, 0, 0]
     });
-  }else{
+  }
+  else {
     InitVector(pointListScientist);
 
     listFire[0].setVisibility(false);
@@ -248,8 +273,7 @@ async function ChangeCharacter(character){
   ResetAnime(rootCurrentCharacter);
 }
 
-
-
+//------------------------------------------------------------------------------
 function startChronometer(duration) {
   let timer = duration, minutes, seconds;
   const chronometerElement = document.getElementById('chrono');
@@ -274,24 +298,8 @@ function startChronometer(duration) {
   }, 1000);
 }
 
-// Ajout d'un gestionnaire d'événements pour chaque image
-document.getElementById("image1").addEventListener("click", function() {
-  document.getElementById("home").style.display = "none";
-  ChangeCharacter("scientist");
-  document.getElementById("chrono").style.display = "block";
-  startChronometer(2 * 60 + 30);
-});
-
-document.getElementById("image2").addEventListener("click", function() {
-  document.getElementById("home").style.display = "none";
-  ChangeCharacter("caveman");
-  document.getElementById("chrono").style.display = "block";
-  startChronometer(2 * 60 + 30);
-  
-});
-
-
-async function InitCol(){
+//------------------------------------------------------------------------------
+async function InitCol() {
   const debug = await SDK3DVerse.engineAPI.findEntitiesByEUID('618978eb-18b5-47dd-821e-067326e33fd6');
   const externCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('1d5657f0-9e9c-4364-b33e-28f1e448e351');
   const internCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('7654171b-06da-4365-98b6-8b0c924f1945');
@@ -300,7 +308,8 @@ async function InitCol(){
   externCollision[0].setVisibility(false);
 }
 
-async function InitFresque(fresques){
+//------------------------------------------------------------------------------
+async function InitFresque(fresques) {
   fresques.forEach(async function(fresque) {
     const childrenFresque = await fresque.getChildren();
 
@@ -314,11 +323,12 @@ async function InitFresque(fresques){
   });
 }
 
-async function InitVector(pointList){
+//------------------------------------------------------------------------------
+async function InitVector(pointList) {
   const childrenList = await pointList[0].getChildren();
   const sizeChildrenList = childrenList.length;
 
-  var trueChildrenList = [];
+  const trueChildrenList = [];
 
   for (let i = 0; i < sizeChildrenList; i++) {
     for (let j = 0; j < sizeChildrenList; j++) {
@@ -327,27 +337,25 @@ async function InitVector(pointList){
         pointPosition.push(childrenList[j].getGlobalTransform().position)
       }
     }
-    
   }
 
   for (let i = 0; i < sizeChildrenList - 1; i++) {
-
-    var pointA = [0,0,0]
-    var pointB = [0,0,0]
+    let pointA = [0,0,0]
+    let pointB = [0,0,0]
 
     pointA = trueChildrenList[i].getGlobalTransform().position;
     pointB = trueChildrenList[i+1].getGlobalTransform().position;
     await Vector(pointA, pointB);
   }
-  
 }
 
-async function Vector(a , b){
-  var vect = [0,0,0];
-  var norm = Math.sqrt( ((b[0]-a[0])**2) + ((b[1]-a[1])**2) + ((b[2]-a[2])**2))
-  vect[0] = (b[0] - a[0]) / norm; 
-  vect[1] = (b[1] - a[1]) / norm; 
-  vect[2] = (b[2] - a[2]) / norm; 
+//------------------------------------------------------------------------------
+async function Vector(a , b) {
+  const vect = [0,0,0];
+  const norm = Math.sqrt( ((b[0]-a[0])**2) + ((b[1]-a[1])**2) + ((b[2]-a[2])**2))
+  vect[0] = (b[0] - a[0]) / norm;
+  vect[1] = (b[1] - a[1]) / norm;
+  vect[2] = (b[2] - a[2]) / norm;
   listVector.push(vect);
 }
 
@@ -358,6 +366,9 @@ async function InitFirstPersonController(charCtlSceneUUID) {
   // that points to the character controller scene.
   const playerTemplate = new SDK3DVerse.EntityTemplate();
   playerTemplate.attachComponent("scene_ref", { value: charCtlSceneUUID });
+  playerTemplate.attachComponent("local_transform", {
+    position: [0,0,-1]
+   });
 
   // Passing null as parent entity will instantiate our new entity at the root
   // of the main scene.
@@ -395,7 +406,7 @@ async function InitFirstPersonController(charCtlSceneUUID) {
 }
 
 //------------------------------------------------------------------------------
-async function deleteFPSCameraController(){
+async function deleteFPSCameraController() {
   // Remove the camera controls set by the setFPSCameraController function, and
   //reverse to the default 3Dverse camera controls
   SDK3DVerse.actionMap.values["LOOK_LEFT"][0] = ['MOUSE_BTN_LEFT', 'MOUSE_AXIS_X_POS'];
@@ -403,7 +414,7 @@ async function deleteFPSCameraController(){
   SDK3DVerse.actionMap.values["LOOK_DOWN"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_Y_NEG"];
   SDK3DVerse.actionMap.values["LOOK_UP"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_Y_POS"];
   SDK3DVerse.actionMap.propagate();
-  
+
   if (document.pointerLockElement || document.mozPointerLockElement || document.webkitPointerLockElement) {
     document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock || document.webkitExitPointerLock;
     document.exitPointerLock();
@@ -411,8 +422,8 @@ async function deleteFPSCameraController(){
 };
 
 //------------------------------------------------------------------------------
-async function setFPSCameraController(canvas){
-  // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and 
+async function setFPSCameraController(canvas) {
+  // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and
   // LOOK_DOWN actions.
   SDK3DVerse.actionMap.values["LOOK_LEFT"][0] = ["MOUSE_AXIS_X_POS"];
   SDK3DVerse.actionMap.values["LOOK_RIGHT"][0] = ["MOUSE_AXIS_X_NEG"];
@@ -422,13 +433,14 @@ async function setFPSCameraController(canvas){
 
   // Lock the mouse pointer.
   canvas.requestPointerLock = (
-    canvas.requestPointerLock 
-    || canvas.mozRequestPointerLock 
+    canvas.requestPointerLock
+    || canvas.mozRequestPointerLock
     || canvas.webkitPointerLockElement
   );
   canvas.requestPointerLock();
 };
 
+//------------------------------------------------------------------------------
 async function onClick(event) {
   const target = await SDK3DVerse.engineAPI.castScreenSpaceRay(
     event.clientX,
@@ -438,95 +450,92 @@ async function onClick(event) {
   const clickedEntity = target.entity;
 }
 
-async function checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter, canvas){
-  if(event.key== "e"){
-    detectionFresque(fresques, currentCharacter, canvas);
+//------------------------------------------------------------------------------
+async function checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter) {
+  switch(event.key) {
+    case 'e':
+      detectionFresque(fresques, currentCharacter);
+      break;
+    case 'r':
+      detectionGuide(currentCharacter, rootCurrentCharacter);
+      break;
+    case 'f':
+      changeStateTorch();
+      break;
+    case 'Escape':
+      document.getElementById("text-fresque").style.display = "none";
+      break;
+    default:
+      break;
   }
-
-  if(event.key== "r"){
-    detectionGuide(currentCharacter, rootCurrentCharacter);
-  }
-  if(event.key== "f"){
-    changeStateTorch();
-  }
-
-  if(event.key== "Escape"){
-    document.getElementById("text-fresque").style.display = "none";
-  }
-
 }
 
-
-
-
-async function changeStateTorch(){
+//------------------------------------------------------------------------------
+async function changeStateTorch() {
   const torch = await SDK3DVerse.engineAPI.findEntitiesByEUID('bcc769ca-6cec-4c89-a8d7-bd408a3f4142');
   if(torch[0].components.point_light.intensity == 1) {
     torch[0].setComponent('point_light', { intensity: 0 });
   }
-  
   else {
     torch[0].setComponent('point_light', { intensity: 1 });
   }
-  
 }
 
-var trueFresque = 0;
-var distFresque = 4;
-async function detectionFresque(fresques, scientist, canvas){
-  
+//------------------------------------------------------------------------------
+let trueFresque = 0;
+let distFresque = 4;
+async function detectionFresque(fresques, scientist) {
   const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
   const posUser = await user[0].getTransform().position;
-  var posFresque;
+  let posFresque;
 
-  if(document.getElementById("text-fresque").style.display == "block"){
+  if(document.getElementById("text-fresque").style.display == "block") {
     document.getElementById("text-fresque").style.display = "none";
     console.log("a");
-  }else{
-
+  }
+  else {
     trueFresque = 0;
     distFresque = 4;
     await fresques.forEach(async function(fresque) {
       const childrenFresque = await fresque.getChildren();
-      if(scientist[0].components.debug_name.value == "caveman"){
-        if(childrenFresque[1].components.debug_name.value == "fresque"){
+      if(scientist[0].components.debug_name.value == "caveman") {
+        if(childrenFresque[1].components.debug_name.value == "fresque") {
           posFresque = await childrenFresque[1].getGlobalTransform().position;
-        }else{
+        }
+        else {
           posFresque = await childrenFresque[0].getGlobalTransform().position;
         }
-      }else{
-        if(childrenFresque[1].components.debug_name.value == "fresque"){
+      }
+      else {
+        if(childrenFresque[1].components.debug_name.value == "fresque") {
           posFresque = await childrenFresque[0].getGlobalTransform().position;
-        }else{
+        }
+        else {
           posFresque = await childrenFresque[1].getGlobalTransform().position;
         }
       }
 
       const dist = Math.sqrt( ((posFresque[0] - posUser[0]) **2 ) + ((posFresque[1] - posUser[1]) **2) + ((posFresque[2] - posUser[2]) **2));
-      
       console.log(dist);
 
-      if( dist < 4 && dist < distFresque){
+      if( dist < 4 && dist < distFresque) {
         distFresque = dist;
         trueFresque = fresque;
-        
         TextFresque(trueFresque);
       }
     });
-
-
   }
 }
 
-async function TextFresque(fresque){
-
+//------------------------------------------------------------------------------
+async function TextFresque(fresque) {
   console.log(fresque.components.debug_name.value);
 
   const name = fresque.components.debug_name.value;
   console.log(name);
 
-  var titleElement = document.querySelector('#text-fresque h2');
-  var linkElement = document.querySelector('.text p');
+  const titleElement = document.querySelector('#text-fresque h2');
+  const linkElement = document.querySelector('.text p');
 
   if(name =="Bison"){
     titleElement.innerText = 'Bison';
@@ -541,100 +550,95 @@ async function TextFresque(fresque){
     titleElement.innerText = 'Fresque';
     linkElement.innerText = 'Nouveau Texte du lien';
   }
-  
-  document.getElementById("text-fresque").style.display = "block";
 
+  document.getElementById("text-fresque").style.display = "block";
 }
 
-async function detectionGuide(scientist, rootScientist){
+//------------------------------------------------------------------------------
+async function detectionGuide(scientist, rootScientist) {
   const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
   const posUser = await user[0].getTransform().position;
- 
-  if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15){
+
+  if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15) {
     const scientistPosition = scientist[0].getGlobalTransform().position;
     const scientistTransform = rootScientist[0].getGlobalTransform();
     const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
-    if(dist<2){
-      if(!scientistTalk && stepScientist>=0){
+
+    if(dist<2) {
+      if(!scientistTalk && stepScientist>=0) {
         const audio = audioList[stepAudio];
         document.getElementById(audio).play();
         scientistTalk = true;
-
-        
-      }else{
-        if(stepScientist!=0 && scientistTalk){
+      }
+      else {
+        if(stepScientist!=0 && scientistTalk) {
           document.getElementById(audioList[stepAudio]).pause();
           document.getElementById(audioList[stepAudio]).currentTime = 0;
           stepAudio += 1;
-        }            
+        }
         stepScientist += 1 ;
 
         scientistTalk = false;
         scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
         rootScientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
-
       }
     }
   }
 }
 
-
-async function rotation(pointA, pointB)
-{
+//------------------------------------------------------------------------------
+async function rotation(pointA, pointB) {
   const deltaX = pointB[0] - pointA[0];
   const deltaZ = pointB[2] - pointA[2];
 
   const angleRad = Math.atan2(deltaZ, deltaX);
-
-  var angleDeg = -(((angleRad * 180) / Math.PI) - 90);
+  const angleDeg = -(((angleRad * 180) / Math.PI) - 90);
 
   return angleDeg;
 }
 
-var lastTime = performance.now();
-async function update(scientist, canvas)
-{
+//------------------------------------------------------------------------------
+let lastTime = performance.now();
+async function update(scientist, canvas) {
   //verification si la souris est lock pour désactiver le suivi de la caméra avec le curseur
   if (document.pointerLockElement == null) {
     deleteFPSCameraController();
   }
 
-
   const deltaTime = performance.now() - lastTime;
   lastTime = performance.now();
   const scientistTransform = scientist[0].getGlobalTransform();
-  var scientistAnime = scientist[0].getComponent('animation_controller').dataJSON; 
+  const scientistAnime = scientist[0].getComponent('animation_controller').dataJSON;
   if (listVector.length > stepScientist && listVector.length != 0) {
-
     const dist = Math.sqrt( ((pointPosition[stepScientist + 1][0] - scientistTransform.position[0]) **2 ) + ((pointPosition[stepScientist + 1][1] - scientistTransform.position[1]) **2) + ((pointPosition[stepScientist + 1][2] - scientistTransform.position[2]) **2));
-    
-    if(dist >= 0.1 && stepScientist >=0 ){
-      if(scientistAnime.Walking == false && (scientistAnime.Standing == true || scientistAnime.Talking == true)){
+
+    if(dist >= 0.1 && stepScientist >=0 ) {
+      if(scientistAnime.Walking == false && (scientistAnime.Standing == true || scientistAnime.Talking == true)) {
         scientistAnime.Standing = false;
         scientistAnime.Talking = false;
         scientistAnime.Walking = true;
         scientist[0].setComponent("animation_controller", scientistAnime);
       }
-      
-      scientistTransform.position[0] += 0.0005 * deltaTime * listVector[stepScientist][0]; 
-      scientistTransform.position[1] += 0.0005 * deltaTime * listVector[stepScientist][1]; 
-      scientistTransform.position[2] += 0.0005 * deltaTime * listVector[stepScientist][2]; 
-    }else if(stepScientist !=-1 && stepScientist !=3 && stepScientist !=7 && stepScientist !=14 && stepScientist !=15){
+      scientistTransform.position[0] += 0.0005 * deltaTime * listVector[stepScientist][0];
+      scientistTransform.position[1] += 0.0005 * deltaTime * listVector[stepScientist][1];
+      scientistTransform.position[2] += 0.0005 * deltaTime * listVector[stepScientist][2];
+    }
+    else if(stepScientist !=-1 && stepScientist !=3 && stepScientist !=7 && stepScientist !=14 && stepScientist !=15) {
       stepScientist += 1;
       const rot = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
       scientistTransform.eulerOrientation[1] = rot;
-    }else {
-      if (scientistTalk == true) {
+    }
+    else {
+      if(scientistTalk == true) {
         const rot = await rotation(pointPosition[stepScientist + 1], SDK3DVerse.engineAPI.cameraAPI.getActiveViewports()[0].getTransform().position);
         scientistTransform.eulerOrientation[1] = rot;
       }
-      if(scientistTalk == true && scientistAnime.Talking == false){
+      if(scientistTalk == true && scientistAnime.Talking == false) {
         scientistAnime.Standing = false;
         scientistAnime.Talking = true;
         scientist[0].setComponent("animation_controller", scientistAnime);
-      
-
-      }else if(scientistAnime.Walking == true){
+      }
+      else if(scientistAnime.Walking == true) {
         scientistAnime.Standing = true;
         scientistAnime.Walking = false;
         scientist[0].setComponent("animation_controller", scientistAnime);
