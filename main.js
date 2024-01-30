@@ -95,14 +95,14 @@ async function InitApp(canvas) {
   //document.getElementById("Grotte").play();
 
   // Ajout d'un gestionnaire d'événements pour chaque image
-  document.getElementById("image1").addEventListener("click", function() {
+  document.getElementById("choice1").addEventListener("click", function() {
     document.getElementById("home").style.display = "none";
     ChangeCharacter("scientist");
     document.getElementById("chrono").style.display = "block";
     startChronometer(2 * 60 + 30);
   });
 
-  document.getElementById("image2").addEventListener("click", function() {
+  document.getElementById("choice2").addEventListener("click", function() {
     document.getElementById("home").style.display = "none";
     ChangeCharacter("caveman");
     document.getElementById("chrono").style.display = "block";
@@ -139,7 +139,8 @@ async function initGameState() {
   // while its visible state in the scene graph remains hidden.
   // So one should set the visibility after ResetAnim.
   ResetAnime(rootCurrentCharacter);
-
+  rootCaveman[0].setVisibility(true);
+  rootScientist[0].setVisibility(true);
   rootCaveman[0].setVisibility(false);
   rootScientist[0].setVisibility(false);
 
