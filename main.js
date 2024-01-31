@@ -99,7 +99,7 @@ async function InitApp(canvas) {
     document.getElementById("home").style.display = "none";
     ChangeCharacter("scientist");
     document.getElementById("chrono").style.display = "block";
-    startChronometer(2 * 60 + 30);
+    startChronometer(1);
   });
 
   document.getElementById("choice2").addEventListener("click", function() {
