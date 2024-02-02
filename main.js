@@ -99,7 +99,7 @@ async function InitApp(canvas) {
     document.getElementById("home").style.display = "none";
     ChangeCharacter("scientist");
     document.getElementById("chrono").style.display = "block";
-    startChronometer(1);
+    startChronometer(2 * 60 + 30);
   });
 
   document.getElementById("choice2").addEventListener("click", function() {
@@ -301,21 +301,7 @@ async function ChangeCharacter(character) {
       position : [0, 0, 0]
     });
 
-    externCollision[0].setGlobalTransform({
-      position : [0, 100, 0]
-    });
-
-    internCollision[0].setGlobalTransform({
-      position : [0, 0, 0]
-    });
-
-    externCollision[0].setGlobalTransform({
-      position : [0, 100, 0]
-    });
-
-    internCollision[0].setGlobalTransform({
-      position : [0, 0, 0]
-    });
+  
   }
   ResetAnime(rootCurrentCharacter);
 }
