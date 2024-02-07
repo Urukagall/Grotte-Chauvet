@@ -240,9 +240,13 @@ async function ChangeCharacter(character) {
     currentCharacter = caveMan;
     rootCaveMan[0].setVisibility(true);
     
-    rootCaveman[0].setGlobalTransform({
-      position : [0, 0, 0]
+    console.log("a");
+
+    rootCaveMan[0].setGlobalTransform({
+      position : [-0.141683, -0.284934, 0.362731]
     });
+
+    console.log("b");
 
     rootScientist[0].setGlobalTransform({
       position : [0, 100, 0]
@@ -262,6 +266,8 @@ async function ChangeCharacter(character) {
     externCollision[0].setGlobalTransform({
       position : [0, 0, 0]
     });
+    
+    console.log("intern out");
   }
   else {
     InitVector(pointListScientist);
@@ -278,12 +284,12 @@ async function ChangeCharacter(character) {
     currentCharacter = scientist;
     rootScientist[0].setVisibility(true);
     
-    rootCaveman[0].setGlobalTransform({
+    rootCaveMan[0].setGlobalTransform({
       position : [0, 100, 0]
     });
 
     rootScientist[0].setGlobalTransform({
-      position : [0, 0, 0]
+      position : [-0.141683, -0.284934, 0.362731]
     });
     
     audioList = audioScientist;
@@ -301,6 +307,7 @@ async function ChangeCharacter(character) {
       position : [0, 0, 0]
     });
 
+    console.log("extern out");
   
   }
   ResetAnime(rootCurrentCharacter);
