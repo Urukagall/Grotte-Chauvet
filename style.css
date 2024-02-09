@@ -121,7 +121,7 @@ h3 {
 }
 
 .guideBox{
-  background-color: white;
+  background-color: rgb(208, 209, 255);
   width: 25%;
   font-size: 35px;
   border-radius: 10px;
@@ -209,9 +209,26 @@ h3 {
 
 .text-finish{
   font-size: 60px;
-  margin-top: 20%;
+  margin-top: 5%;
   font: bold;
 }
+
+.text-thanks{
+  font-size: 40px;
+  margin-top: 5%;
+  font: bold;
+}
+
+.credit{
+  display: flex;
+  justify-content: center;
+}
+
+.credit-list{
+  margin-right: 2%;
+  margin-left: 2%;
+}
+
 #reset{
   margin-top: 5%;
   border: 1px solid #ccc;

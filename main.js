@@ -99,7 +99,8 @@ async function InitApp(canvas) {
     document.getElementById("home").style.display = "none";
     ChangeCharacter("scientist");
     document.getElementById("chrono").style.display = "block";
-    startChronometer(2 * 60 + 30);
+    // startChronometer(2 * 60 + 30);
+    startChronometer(2);
   });
 
   document.getElementById("choice2").addEventListener("click", function() {
@@ -214,6 +215,8 @@ async function ChangeCharacter(character) {
 
   const externCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('1d5657f0-9e9c-4364-b33e-28f1e448e351');
   const internCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('7654171b-06da-4365-98b6-8b0c924f1945');
+  
+  const midCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('ddabc7d2-e6ac-402f-b6e8-b4fdc50ed719');
 
   const panneau1 = await SDK3DVerse.engineAPI.findEntitiesByEUID('238add87-5d43-482b-8554-6e9d776064d6');
   const panneau2 = await SDK3DVerse.engineAPI.findEntitiesByEUID('95c473b0-f684-48ab-96bd-7c4f2ee7ec87');
@@ -225,6 +228,7 @@ async function ChangeCharacter(character) {
   const listFire = await SDK3DVerse.engineAPI.findEntitiesByEUID('db89ed9c-eb11-4974-8aae-d062753269ae');
   const listLed = await SDK3DVerse.engineAPI.findEntitiesByEUID('67abe046-cf07-4f66-9a22-7c671702571c');
 
+  const player = await SDK3DVerse.engineAPI.findEntitiesByEUID('2252d8f2-d48f-4210-99f9-069968904a45');
   if(character == "caveman"){
     InitVector(pointListCaveMan);
 
@@ -241,8 +245,12 @@ async function ChangeCharacter(character) {
     rootCaveMan[0].setVisibility(true);
 
     rootCaveMan[0].setGlobalTransform({
-      position : [-0.141683, -0.284934, 0.362731]
+      position : [-1.321874, -0.803166, 0.084539]
     });
+
+    player[0].setGlobalTransform({
+      position : [-1, 0, -1]
+    })
 
     rootScientist[0].setGlobalTransform({
       position : [0, 100, 0]
@@ -260,6 +268,9 @@ async function ChangeCharacter(character) {
     });
 
     externCollision[0].setGlobalTransform({
+      position : [0, 0, 0]
+    });
+    midCollision[0].setGlobalTransform({
       position : [0, 0, 0]
     });
   }
@@ -300,7 +311,9 @@ async function ChangeCharacter(character) {
     internCollision[0].setGlobalTransform({
       position : [0, 0, 0]
     });
-  
+    midCollision[0].setGlobalTransform({
+      position : [0, 100, 0]
+    });
   }
   ResetAnime(rootCurrentCharacter);
 }
