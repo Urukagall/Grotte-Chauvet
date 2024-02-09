@@ -219,14 +219,27 @@ h3 {
   font: bold;
 }
 
+.credit-div{
+  margin-top: 5%;
+}
+
 .credit{
   display: flex;
-  justify-content: center;
+  justify-content: space-evenly;
+}
+
+.credit-text{
+  font-size: 30px;
+}
+
+.credit-people{
+  font-size: 20px;
 }
 
 .credit-list{
   margin-right: 2%;
   margin-left: 2%;
+  width: 20%;
 }
 
 #reset{

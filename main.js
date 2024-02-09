@@ -227,7 +227,6 @@ async function ChangeCharacter(character) {
   const pointListScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('eb4d7ab6-113d-4148-b2d1-43ddbc056291');
   const listFire = await SDK3DVerse.engineAPI.findEntitiesByEUID('db89ed9c-eb11-4974-8aae-d062753269ae');
   const listLed = await SDK3DVerse.engineAPI.findEntitiesByEUID('67abe046-cf07-4f66-9a22-7c671702571c');
-
   const player = await SDK3DVerse.engineAPI.findEntitiesByEUID('2252d8f2-d48f-4210-99f9-069968904a45');
   if(character == "caveman"){
     InitVector(pointListCaveMan);
