@@ -100,7 +100,7 @@ async function InitApp(canvas) {
     ChangeCharacter("scientist");
     document.getElementById("chrono").style.display = "block";
     // startChronometer(2 * 60 + 30);
-    startChronometer(2);
+    startChronometer(10);
   });
 
   document.getElementById("choice2").addEventListener("click", function() {
@@ -228,8 +228,10 @@ async function ChangeCharacter(character) {
   const listFire = await SDK3DVerse.engineAPI.findEntitiesByEUID('db89ed9c-eb11-4974-8aae-d062753269ae');
   const listLed = await SDK3DVerse.engineAPI.findEntitiesByEUID('67abe046-cf07-4f66-9a22-7c671702571c');
   const player = await SDK3DVerse.engineAPI.findEntitiesByEUID('2252d8f2-d48f-4210-99f9-069968904a45');
+
   if(character == "caveman"){
     InitVector(pointListCaveMan);
+
 
     listFire[0].setGlobalTransform({
       position : [0, 0, 0]
@@ -318,9 +320,13 @@ async function ChangeCharacter(character) {
 }
 
 //------------------------------------------------------------------------------
-function startChronometer(duration) {
+async function startChronometer(duration) {
   let timer = duration, minutes, seconds;
   const chronometerElement = document.getElementById('chrono');
+  const camera = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports()[0].getCamera();
+  const cameraDataJSON = camera.getComponent('camera').dataJSON;
+  var intensPlus = 5/5;
+  var intens = 0;
   setInterval(function () {
       minutes = parseInt(timer / 60, 10);
       seconds = parseInt(timer % 60, 10);
@@ -329,7 +335,11 @@ function startChronometer(duration) {
       seconds = seconds < 10 ? "0" + seconds : seconds;
       chronometerElement.textContent = minutes + ":" + seconds;
       console.log(minutes + ":" + seconds);
-
+      console.log(timer);
+      if(timer < 5){
+        camera.setComponent('camera', { dataJSON: { ...cameraDataJSON, ambientIntensity: intensPlus + intens }});
+        intens += intensPlus;
+      }
       if (--timer < 0) {
           console.log("Temps écoulé!");
           chronometerElement.textContent = "Temps écoulé!";
