@@ -7,6 +7,7 @@
       rel="shortcut icon"
       href="https://cdn.3dverse.com/assets/3dverse-wordmark.svg"
     />
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="./style.css" />
     <audio src="Sound/grotte.mp3" id="Grotte"></audio>
     <audio src="Sound/Lyon.mp3" id="Lyon"></audio>
@@ -20,32 +21,30 @@
   </head>
 
   <body>
-    <div class="canvas-container" id="id1">
-      <!-- CANVAS-->
-      <canvas
-        id="display-canvas"
-        class="display-canvas"
-        tabindex="1"
-        oncontextmenu="event.preventDefault()"
-      ></canvas>
-      <img id="loadingIcon" src="./Gif/loading.gif">
-      <div id="home">
-        <div class="link">
-          <a href="https://archeologie.culture.gouv.fr/chauvet/fr">IL Y A 36 000 ANS</a> 
-        </div>
+      <div class="canvas-container" id="id1">
+          <!-- CANVAS-->
+          <canvas id="display-canvas"
+                  class="display-canvas"
+                  tabindex="1"
+                  oncontextmenu="event.preventDefault()"></canvas>
+          <img id="loadingIcon" src="./Gif/loading.gif">
+          <div id="home">
+              <div class="link">
+                  <a href="https://archeologie.culture.gouv.fr/chauvet/fr">IL Y A 36 000 ANS</a>
+              </div>
 
-        <div class="HomeTitle">
-          <img src="img/HomeTitle.png" alt="Scientist"  id="title">
-        </div>
-        <div class="guide">
-          <div class="guideBox" id="choice1">
-            <p class="scientist" >Scientifique</p>
-          </div>
-          <div class="guideBox" id="choice2">
-            <p class="caveman" >Aurignacien</p>
-          </div>
-        </div>
-        <!-- <h2>La Grotte Chauvet</h2>
+              <div class="HomeTitle">
+                  <img src="img/HomeTitle.png" alt="Scientist" id="title">
+              </div>
+              <div class="guide">
+                  <div class="guideBox" id="choice1">
+                      <p class="scientist">Scientifique</p>
+                  </div>
+                  <div class="guideBox" id="choice2">
+                      <p class="caveman">Aurignacien</p>
+                  </div>
+              </div>
+              <!-- <h2>La Grotte Chauvet</h2>
         <h3>3DVerse</h3>
         <div class="guide">
           <img src="img/scientist.png" alt="Scientist" class="clickable-image" id="image1">
@@ -68,68 +67,77 @@
 
           </div>
         </div> -->
+          </div>
+          <div id="chrono">2:30</div>
+          <!-- Test -->
+          <div class="container-fluid" id="text-fresque">
+              <div class="row align-items-center">
+                  <div class="col-lg-5 col-xl-4 offset-lg-1">
+                      <img src="img/fresque1/fresque11.png" class="img-fluid" alt="Fresque 1">
+                  </div>
+                  <div class="col-lg-7 col-xl-7 content text-center">
+                      <h1>Fresque 1</h1>
+                  </div>
+              </div>
+              <div class="row align-items-center">
+                  <div class="col-lg-7 col-xl-7 content text-center">
+                      <p>
+                          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam autem ratione nihil ab incidunt, obcaecati unde quisquam vitae omnis soluta voluptates ex placeat molestias perspiciatis, nemo sapiente sequi exercitationem consequatur!
+                      </p>
+                  </div>
+                  <div class="col-lg-5 col-xl-4 ">
+                      <img src="img/fresque1/fresque12.png" class="img-fluid" alt="Fresque 2">
+                  </div>
+              </div>
+          </div>
+          <!-- Test -->
+          </div>
+          <div id="finish">
+              <p class="text-finish">L'expérience est terminée</p>
+              <p class="text-thanks">Merci pour votre visite</p>
+              <div id="reset" onclick="location.reload(true)">
+                  <p class="reset">RECOMMENCER</p>
+              </div>
+              <div class="credit-div">
+                  <p class="credit-text">Crédit :</p>
+                  <div class="credit">
+                      <div class="credit-list">
+                          <p class="credit-people">Artiste:</p>
+                          <p class="credit-people">LACALMONTIE Raphaelle</p>
+                          <p class="credit-people">PACALON Léna</p>
+                          <p class="credit-people">QUER Arnaud</p>
+                          <p class="credit-people">RAYER Teddy</p>
+                      </div>
+                      <div class="credit-list">
+                          <p class="credit-people">Business:</p>
+                          <p class="credit-people">CANNONI Diego</p>
+                          <p class="credit-people">PUAUD Elie</p>
+                      </div>
+                      <div class="credit-list">
+                          <p class="credit-people">Développeur:</p>
+                          <p class="credit-people">JORGE AFONSO Dany</p>
+                          <p class="credit-people">HILAIRE Noah</p>
+                          <p class="credit-people">CLEYMAND Bruno</p>
+                          <p class="credit-people">DAMOUR William</p>
+                          <p class="credit-people">REBOUL Gwendal</p>
+                      </div>
+                      <div class="credit-list">
+                          <p class="credit-people">Equipe 3DVerse:</p>
+                          <p class="credit-people">Silvain</p>
+                          <p class="credit-people">Seb</p>
+                      </div>
+                      <div class="credit-list">
+                          <p class="credit-people">Grotte de Chauvet:</p>
+                          <p class="credit-people">Antoine</p>
+                          <p class="credit-people">L'autre</p>
+                          <p class="credit-people">la ministre</p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+
       </div>
-      <div id="chrono">2:30</div>
-      <div id="text-fresque" >
-        <h2>Fresque1</h2>
-        <div class="text-img">
-          <div id="img-fresque">
-            <img id="img1" src="img/fresque1/fresque11.png">
-            <img id="img2" class="img2" src="img/fresque1/fresque12.png">
-          </div>
-          <div class="text">
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam autem ratione nihil ab incidunt, obcaecati unde quisquam vitae omnis soluta voluptates ex placeat molestias perspiciatis, nemo sapiente sequi exercitationem consequatur!</p>
-          </div>
-
-        </div>
-
-      </div>
-      <div id="finish">
-          <p class="text-finish">L'expérience est terminée</p>
-          <p class="text-thanks">Merci pour votre visite</p>
-          <div id="reset" onclick="location.reload(true)">
-            <p class="reset" >RECOMMENCER</p>
-          </div>
-        <div class="credit-div">
-          <p class="credit-text">Crédit :</p>
-          <div class="credit">
-            <div class="credit-list">
-              <p class="credit-people">Artiste:</p>
-              <p class="credit-people">LACALMONTIE Raphaelle</p>
-              <p class="credit-people">PACALON Léna</p>
-              <p class="credit-people">QUER Arnaud</p>
-              <p class="credit-people">RAYER Teddy</p>
-            </div>
-            <div class="credit-list">
-              <p class="credit-people">Business:</p>
-              <p class="credit-people">CANNONI Diego</p>
-              <p class="credit-people">PUAUD Elie</p>
-            </div>
-            <div class="credit-list">
-              <p class="credit-people">Développeur:</p>
-              <p class="credit-people">JORGE AFONSO Dany</p>
-              <p class="">HILAIRE Noah</p>
-              <p class="credit-people">CLEYMAND Bruno</p>
-              <p class="credit-people">DAMOUR William</p>
-              <p class="credit-people">REBOUL Gwendal</p>
-            </div>
-            <div class="credit-list">
-              <p class="credit-people">Equipe 3DVerse:</p>
-              <p class="credit-people">Silvain</p>
-              <p class="credit-people">Seb</p>
-            </div>
-            <div class="credit-list">
-              <p class="credit-people">Grotte de Chauvet:</p>
-              <p class="credit-people">Antoine</p>
-              <p class="credit-people">L'autre</p>
-              <p class="credit-people">la ministre</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-    </div>
 
   
     <!-- SDK 3DVERSE -->
