@@ -5,7 +5,29 @@ import {
   caveSceneUUID,
   caveLinkerEntityName,
   characterControllerSceneUUID,
-} from "./config.js";
+} from "./Js/config.js";
+
+import{
+  rotation,
+  InitVector,
+  Vector
+} from "./Js/chauvetMaths.js";
+
+import{
+  InitFresque,
+  TextFresque,
+}from "./Js/fresque.js"
+
+import{
+  detectionFresque,
+  detectionGuide,
+  InitFirstPersonController,
+  deleteFPSCameraController,
+  setFPSCameraController,
+  changeStateTorch,
+  onClick,
+  checkKeyPressed,
+}from "./Js/characterController.js"
 
 //------------------------------------------------------------------------------
 window.addEventListener("load", () => {
@@ -31,34 +53,11 @@ let mainSceneLoadedResolve;
 let mainSceneLoadedPromise = new Promise(resolve => { mainSceneLoadedResolve = resolve; });
 
 //------------------------------------------------------------------------------
-// SEB: No idea why you did that but the listener is actually never called because all listeners
-//      are removed from SDK3DVerse.notifier once you call SDK3DVerse.joinOrStartSession.
-//      Also this listener seems very weird!
-/*
-SDK3DVerse.notifier.on('onAssetsLoadedChanged', (areAssetsLoaded) =>
-{
-  console.log('areAssetsLoaded', areAssetsLoaded);
-  if (areAssetsLoaded) {
-    console.log('areAssetsLoaded', areAssetsLoaded);
-
-    const element = document.getElementById("id1");
-    element.innerHTML="<canvas id='display-canvas' class='display-canvas' tabindex='1' oncontextmenu='event.preventDefault()'></canvas>";
-
-    document.getElementById("display-canvas").style.display = "none";
-    document.getElementById("home").style.display = "block";
-  }
-  else{
-    document.getElementById("display-canvas").style.display = "none";
-  }
-});
-*/
-
-//------------------------------------------------------------------------------
 async function InitApp(canvas) {
   // hide canvas until main assets are loaded
   canvas.style.display = "none";
 
-  const isSessionCreator = await SDK3DVerse.joinOrStartSession({
+  const isSessionCreator = await SDK3DVerse.joinSession({
     userToken: publicToken,
     sceneUUID: mainSceneUUID,
     canvas: canvas,
@@ -79,10 +78,10 @@ async function InitApp(canvas) {
     await mainSceneLoadedPromise;
   }
   else {
-    console.log("Session joined => wait a few seconds before popping our avatar");
-    // Since we're not the session creator we cannot know if the main scene is fully loaded or not.
-    // So we'll just wait a few seconds to be sure the floor assets have been loaded before popping our avatar.
-    // Just in case we are joining while the floor is still loading.
+    console.log("Session joined => creating a new session for you soon");
+    // This is a single player project, so there should 
+    // always be only one player per session. 
+    // If you're not the creator, you'll be sent to a new one either way
     await new Promise(resolve => setTimeout(resolve, 3000));
   }
 
@@ -99,15 +98,15 @@ async function InitApp(canvas) {
     document.getElementById("home").style.display = "none";
     ChangeCharacter("scientist");
     document.getElementById("chrono").style.display = "block";
-     startChronometer(2 * 60 + 30);
-    //startChronometer(10);
+     startStopwatch(2 * 60 + 30);
+    //startStopwatch(10);
   });
 
   document.getElementById("choice2").addEventListener("click", function() {
     document.getElementById("home").style.display = "none";
     ChangeCharacter("caveman");
     document.getElementById("chrono").style.display = "block";
-    startChronometer(2 * 60 + 30);
+    startStopwatch(2 * 60 + 30);
   });
 
   await InitFirstPersonController(characterControllerSceneUUID);
@@ -320,12 +319,12 @@ async function ChangeCharacter(character) {
 }
 
 //------------------------------------------------------------------------------
-async function startChronometer(duration) {
+async function startStopwatch(duration) {
   let timer = duration, minutes, seconds;
   const chronometerElement = document.getElementById('chrono');
   const camera = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports()[0].getCamera();
   const cameraDataJSON = camera.getComponent('camera').dataJSON;
-  var intensPlus = 5/5;
+  var intensPlus = 1/5;
   var intens = 0;
   setInterval(function () {
       minutes = parseInt(timer / 60, 10);
@@ -360,305 +359,6 @@ async function InitCol() {
   debug[0].setVisibility(false);
   internCollision[0].setVisibility(false);
   externCollision[0].setVisibility(false);
-}
-
-//------------------------------------------------------------------------------
-async function InitFresque(fresques) {
-  fresques.forEach(async function(fresque) {
-    const childrenFresque = await fresque.getChildren();
-
-      // for (let i = 0; i < 2; i++) {
-      //   if (fresque.children[1] == childrenFresque[i].rtid) {
-      //     childrenFresque[i].setVisibility(false);
-      //   }
-      // }
-      childrenFresque[0].setVisibility(true);
-      childrenFresque[1].setVisibility(true);
-  });
-}
-
-//------------------------------------------------------------------------------
-async function InitVector(pointList) {
-  const childrenList = await pointList[0].getChildren();
-  const sizeChildrenList = childrenList.length;
-
-  const trueChildrenList = [];
-
-  for (let i = 0; i < sizeChildrenList; i++) {
-    for (let j = 0; j < sizeChildrenList; j++) {
-      if (childrenList[j].components.debug_name.value == (i+1).toString()) {
-        trueChildrenList.push(childrenList[j])
-        pointPosition.push(childrenList[j].getGlobalTransform().position)
-      }
-    }
-  }
-
-  for (let i = 0; i < sizeChildrenList - 1; i++) {
-    let pointA = [0,0,0]
-    let pointB = [0,0,0]
-
-    pointA = trueChildrenList[i].getGlobalTransform().position;
-    pointB = trueChildrenList[i+1].getGlobalTransform().position;
-    await Vector(pointA, pointB);
-  }
-}
-
-//------------------------------------------------------------------------------
-async function Vector(a , b) {
-  const vect = [0,0,0];
-  const norm = Math.sqrt( ((b[0]-a[0])**2) + ((b[1]-a[1])**2) + ((b[2]-a[2])**2))
-  vect[0] = (b[0] - a[0]) / norm;
-  vect[1] = (b[1] - a[1]) / norm;
-  vect[2] = (b[2] - a[2]) / norm;
-  listVector.push(vect);
-}
-
-//------------------------------------------------------------------------------
-async function InitFirstPersonController(charCtlSceneUUID) {
-  // To spawn an entity we need to create an EntityTempllate and specify the
-  // components we want to attach to it. In this case we only want a scene_ref
-  // that points to the character controller scene.
-  const playerTemplate = new SDK3DVerse.EntityTemplate();
-  playerTemplate.attachComponent("scene_ref", { value: charCtlSceneUUID });
-  playerTemplate.attachComponent("local_transform", {
-    position: [0,0,-1]
-   });
-
-  // Passing null as parent entity will instantiate our new entity at the root
-  // of the main scene.
-  const parentEntity = null;
-  // Setting this option to true will ensure that our entity will be destroyed
-  // when the client is disconnected from the session, making sure we don't
-  // leave our 'dead' player body behind.
-  const deleteOnClientDisconnection = true;
-  // We don't want the player to be saved forever in the scene, so we
-  // instantiate a transient entity.
-  // Note that an entity template can be instantiated multiple times.
-  // Each instantiation results in a new entity.
-  const playerSceneEntity = await playerTemplate.instantiateTransientEntity(
-    "Player",
-    parentEntity,
-    deleteOnClientDisconnection
-  );
-
-  // The character controller scene is setup as having a single entity at its
-  // root which is the first person controller itself.
-  const firstPersonController = (await playerSceneEntity.getChildren())[0];
-  // Look for the first person camera in the children of the controller.
-  const children = await firstPersonController.getChildren();
-  const firstPersonCamera = children.find((child) =>
-    child.isAttached("camera")
-  );
-
-  // We need to assign the current client to the first person controller
-  // script which is attached to the firstPersonController entity.
-  // This allows the script to know which client inputs it should read.
-  SDK3DVerse.engineAPI.assignClientToScripts(firstPersonController);
-
-  // Finally set the first person camera as the main camera.
-  SDK3DVerse.setMainCamera(firstPersonCamera);
-}
-
-//------------------------------------------------------------------------------
-async function deleteFPSCameraController() {
-  // Remove the camera controls set by the setFPSCameraController function, and
-  //reverse to the default 3Dverse camera controls
-  SDK3DVerse.actionMap.values["LOOK_LEFT"][0] = ['MOUSE_BTN_LEFT', 'MOUSE_AXIS_X_POS'];
-  SDK3DVerse.actionMap.values["LOOK_RIGHT"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_X_NEG"];
-  SDK3DVerse.actionMap.values["LOOK_DOWN"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_Y_NEG"];
-  SDK3DVerse.actionMap.values["LOOK_UP"][0] = ['MOUSE_BTN_LEFT', "MOUSE_AXIS_Y_POS"];
-  SDK3DVerse.actionMap.propagate();
-
-  if (document.pointerLockElement || document.mozPointerLockElement || document.webkitPointerLockElement) {
-    document.exitPointerLock = document.exitPointerLock || document.mozExitPointerLock || document.webkitExitPointerLock;
-    document.exitPointerLock();
-  }
-};
-
-//------------------------------------------------------------------------------
-async function setFPSCameraController(canvas) {
-  // Remove the required click for the LOOK_LEFT, LOOK_RIGHT, LOOK_UP, and
-  // LOOK_DOWN actions.
-  SDK3DVerse.actionMap.values["LOOK_LEFT"][0] = ["MOUSE_AXIS_X_POS"];
-  SDK3DVerse.actionMap.values["LOOK_RIGHT"][0] = ["MOUSE_AXIS_X_NEG"];
-  SDK3DVerse.actionMap.values["LOOK_DOWN"][0] = ["MOUSE_AXIS_Y_NEG"];
-  SDK3DVerse.actionMap.values["LOOK_UP"][0] = ["MOUSE_AXIS_Y_POS"];
-  SDK3DVerse.actionMap.propagate();
-
-  // Lock the mouse pointer.
-  canvas.requestPointerLock = (
-    canvas.requestPointerLock
-    || canvas.mozRequestPointerLock
-    || canvas.webkitPointerLockElement
-  );
-  canvas.requestPointerLock();
-};
-
-//------------------------------------------------------------------------------
-async function onClick(event) {
-  const target = await SDK3DVerse.engineAPI.castScreenSpaceRay(
-    event.clientX,
-    event.clientY
-  );
-  if (!target.pickedPosition) return;
-  const clickedEntity = target.entity;
-}
-
-//------------------------------------------------------------------------------
-async function checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter) {
-  switch(event.key) {
-    case 'e':
-      detectionFresque(fresques, currentCharacter);
-      break;
-    case 'r':
-      detectionGuide(currentCharacter, rootCurrentCharacter);
-      break;
-    case 'f':
-      changeStateTorch();
-      break;
-    case 'Escape':
-      document.getElementById("text-fresque").style.display = "none";
-      break;
-    default:
-      break;
-  }
-}
-
-//------------------------------------------------------------------------------
-async function changeStateTorch() {
-  const torch = await SDK3DVerse.engineAPI.findEntitiesByEUID('bcc769ca-6cec-4c89-a8d7-bd408a3f4142');
-  if(torch[0].components.point_light.intensity == 1) {
-    torch[0].setComponent('point_light', { intensity: 0 });
-  }
-  else {
-    torch[0].setComponent('point_light', { intensity: 1 });
-  }
-}
-
-//------------------------------------------------------------------------------
-let trueFresque = 0;
-let distFresque = 4;
-async function detectionFresque(fresques, scientist) {
-  const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
-  const posUser = await user[0].getTransform().position;
-  let posFresque;
-
-  if(document.getElementById("text-fresque").style.display == "block") {
-    document.getElementById("text-fresque").style.display = "none";
-    console.log("a");
-  }
-  else {
-    trueFresque = 0;
-    distFresque = 4;
-    await fresques.forEach(async function(fresque) {
-      const childrenFresque = await fresque.getChildren();
-      if(scientist[0].components.debug_name.value == "caveman") {
-        if(childrenFresque[1].components.debug_name.value == "fresque") {
-          posFresque = await childrenFresque[1].getGlobalTransform().position;
-        }
-        else {
-          posFresque = await childrenFresque[0].getGlobalTransform().position;
-        }
-      }
-      else {
-        if(childrenFresque[1].components.debug_name.value == "fresque") {
-          posFresque = await childrenFresque[0].getGlobalTransform().position;
-        }
-        else {
-          posFresque = await childrenFresque[1].getGlobalTransform().position;
-        }
-      }
-
-      const dist = Math.sqrt( ((posFresque[0] - posUser[0]) **2 ) + ((posFresque[1] - posUser[1]) **2) + ((posFresque[2] - posUser[2]) **2));
-      console.log(dist);
-
-      if( dist < 4 && dist < distFresque) {
-        distFresque = dist;
-        trueFresque = fresque;
-        TextFresque(trueFresque);
-      }
-    });
-  }
-}
-
-//------------------------------------------------------------------------------
-async function TextFresque(fresque) {
-  console.log(fresque.components.debug_name.value);
-
-  const name = fresque.components.debug_name.value;
-  console.log(name);
-
-  const titleElement = document.querySelector('#text-fresque h2');
-  const linkElement = document.querySelector('.text p');
-  var image1 = document.getElementById("img1");
-  var image2 = document.getElementById("img2");
-
-  if(name =="Bison"){
-    titleElement.innerText = 'Les Bisons du Pilier';
-    linkElement.innerText = 'La partie la plus profonde de la salle du Fond est marquée par la présence d’un grand pilier rocheux détaché des parois. Ce support remarquable est occupé par deux bisons croisés, dessinés en noir et rehaussés de gravure. Sur le bison supérieur, on note deux versions du corps, la plus longue paraissant démesurée. Le bison du bas, moins détaillé, est partiellement effacé par le passage des ours des cavernes. Sur le panneau, on note aussi des gravures en tirets alignés formant un signe de type original et l’esquisse d’une tête de mammouth en gravure.';
-    image1.src="img/fresque4/fresque41.png";
-    image2.src="img/fresque4/fresque42.png";
-  }else if(name =="Rhino"){
-    titleElement.innerText = 'Le Rhinocéros et les félins';
-    linkElement.innerText = 'La première partie de la paroi gauche de la salle du Fond s’achève sur un long panneau regroupant trois félins imbriqués et deux rhinocéros. Les félins reprennent le même jeu de couleurs et de composition que le panneau des Trois Lions qui les précèdent. Des deux rhinocéros, un est complet et l’autre évoqué d’une simple gravure de cornes démesurées. Le premier rappelle celui de l’entrée de la salle, associant dessin, estompe  et détourage à la gravure. La paroi est abondamment lacérée de griffades d’ours.';
-    image1.src="img/fresque2/fresque21.png";
-    image2.src="img/fresque2/fresque22.png";
-  }else if(name =="Lion"){
-    titleElement.innerText = 'Les trois Lions';
-    linkElement.innerText = 'Sur le premier palier de la salle du Fond, sur la paroi gauche, la surface irrégulière du calcaire n’a pas empêché la mise en place de trois profils droits de lions des cavernes  imbriqués, dont deux mâles (scrotum). Deux sont tracés au fusain et un, limité à la ligne de dos, est dessiné en rouge. On constate que les mâles n’arboraient pas de crinière. De nombreuses griffades d’ours précèdent ou se superposent aux dessins. Les gravures de deux mammouths se lisent plus haut et recoupent les dos des félins.';
-    image1.src="img/fresque1/fresque11.png";
-    image2.src="img/fresque1/fresque12.png";
-  }else if(name =="Fresque"){
-    titleElement.innerText = 'Panneau des Rhinocéros';
-    linkElement.innerText = 'À hauteur du dernier palier de la salle du Fond, paroi gauche, le premier volet en forme de dièdre de la grande fresque finale se partage en deux thématiques différentes. Le pan de droite renferme une douzaine de rhinocéros majoritairement tournés à gauche. Ils se superposent, se masquent ou se recouvrent comme pour évoquer la représentation d’un troupeau. Les techniques mixtes (fusain et gravure) sont largement employées pour faire ressortir les silhouettes et certains détails.';
-    image1.src="img/fresque3/fresque31.png";
-    image2.src="img/fresque3/fresque32.png";
-  }
-
-  document.getElementById("text-fresque").style.display = "block";
-}
-
-//------------------------------------------------------------------------------
-async function detectionGuide(scientist, rootScientist) {
-  const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
-  const posUser = await user[0].getTransform().position;
-
-  if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15) {
-    const scientistPosition = scientist[0].getGlobalTransform().position;
-    const scientistTransform = rootScientist[0].getGlobalTransform();
-    const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
-
-    if(dist<2) {
-      if(!scientistTalk && stepScientist>=0) {
-        const audio = audioList[stepAudio];
-        document.getElementById(audio).play();
-        scientistTalk = true;
-      }
-      else {
-        if(stepScientist!=0 && scientistTalk) {
-          document.getElementById(audioList[stepAudio]).pause();
-          document.getElementById(audioList[stepAudio]).currentTime = 0;
-          stepAudio += 1;
-        }
-        stepScientist += 1 ;
-
-        scientistTalk = false;
-        scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
-        rootScientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
-      }
-    }
-  }
-}
-
-//------------------------------------------------------------------------------
-async function rotation(pointA, pointB) {
-  const deltaX = pointB[0] - pointA[0];
-  const deltaZ = pointB[2] - pointA[2];
-
-  const angleRad = Math.atan2(deltaZ, deltaX);
-  const angleDeg = -(((angleRad * 180) / Math.PI) - 90);
-
-  return angleDeg;
 }
 
 //------------------------------------------------------------------------------
