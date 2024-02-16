@@ -1,4 +1,5 @@
 import {
+  nameFresque,
   TextFresque
 }from "./fresque.js"
 
@@ -6,36 +7,57 @@ import {
   rotation
 }from "./chauvetMaths.js"
 
+import{
+  stepScientist,
+  stepAudio,
+  rootCurrentCharacter,
+  scientistTalk, 
+  pointPosition,
+  audioList,
+  setStepAudio,
+  setStepScientist,
+  setScientistTalk
+}from "../main.js"
+
 let trueFresque = null;
 let distFresque = 4;
-export async function detectionFresque(fresques, scientist) {
+
+export async function detectionFresque(fresques, currentCharacter) {
   const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
   const posUser = await user[0].getTransform().position;
   let posFresque;
 
   if(document.getElementById("text-fresque").style.display == "block") {
     document.getElementById("text-fresque").style.display = "none";
-    console.log("a");
-  }
-  else {
+    if(nameFresque == "Fresque"){
+      document.getElementById("animation").style.display = "block";
+      document.getElementById("video").src = "anime/anim.mp4";
+    }
+  }else if(document.getElementById("animation").style.display == "block"){
+    document.getElementById("animation").style.display = "none";
+  }else {
     trueFresque = 0;
     distFresque = 4;
     await fresques.forEach(async function(fresque) {
       const childrenFresque = await fresque.getChildren();
-      if(scientist[0].components.debug_name.value == "caveman") {
+      if(currentCharacter[0].components.debug_name.value == "caveman") {
         if(childrenFresque[1].components.debug_name.value == "fresque") {
+          console.log("fresque 1");
           posFresque = await childrenFresque[1].getGlobalTransform().position;
         }
         else {
           posFresque = await childrenFresque[0].getGlobalTransform().position;
+          console.log("fresque 1");
         }
       }
       else {
         if(childrenFresque[1].components.debug_name.value == "fresque") {
           posFresque = await childrenFresque[0].getGlobalTransform().position;
+          console.log("fresque 2");
         }
         else {
           posFresque = await childrenFresque[1].getGlobalTransform().position;
+          console.log("fresque 2");
         }
       }
 
@@ -43,10 +65,9 @@ export async function detectionFresque(fresques, scientist) {
       console.log(dist);
 
       if( dist < 4 && dist < distFresque) {
-        console.log("b");
         distFresque = dist;
         trueFresque = fresque;
-        TextFresque(trueFresque);
+        TextFresque(trueFresque, currentCharacter);
       }
     });
   }
@@ -56,6 +77,7 @@ export async function detectionFresque(fresques, scientist) {
 export async function detectionGuide(scientist, rootScientist) {
     const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
     const posUser = await user[0].getTransform().position;
+    let step = [0,0];
   
     if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15) {
       const scientistPosition = scientist[0].getGlobalTransform().position;
@@ -66,22 +88,25 @@ export async function detectionGuide(scientist, rootScientist) {
         if(!scientistTalk && stepScientist>=0) {
           const audio = audioList[stepAudio];
           document.getElementById(audio).play();
-          scientistTalk = true;
+          setScientistTalk(true);
         }
         else {
           if(stepScientist!=0 && scientistTalk) {
             document.getElementById(audioList[stepAudio]).pause();
             document.getElementById(audioList[stepAudio]).currentTime = 0;
-            stepAudio += 1;
+            setStepAudio(stepAudio + 1);
+            // stepAudio += 1;
           }
-          stepScientist += 1 ;
+          setStepScientist(stepScientist + 1);
+          // stepScientist += 1 ;
   
-          scientistTalk = false;
+          setScientistTalk(false);
           scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
           rootScientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
         }
       }
     }
+    return step;
   }
 
 //------------------------------------------------------------------------------
@@ -190,7 +215,7 @@ export async function onClick(event) {
 export async function checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter) {
   switch(event.key) {
     case 'e':
-      detectionFresque(fresques, currentCharacter);
+      detectionFresque(fresques, rootCurrentCharacter);
       break;
     case 'r':
       detectionGuide(currentCharacter, rootCurrentCharacter);

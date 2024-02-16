@@ -159,10 +159,33 @@ h3 {
   border-radius: 5px;
 }
 
+#tuto{
+  display: none;
+  position: fixed;
+  top : 1%;
+}
+
+#tuto img{
+  width: 15%;
+}
+
+#animation{
+  display: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+#animation video{
+  width: 50%;
+  height: 50%;
+  margin: 25%;
+}
+
 #text-fresque {
     text-align: center;
     position: absolute;
-    background-color: rgba(255, 255, 255, 0.100);
+    background-color: rgba(44, 44, 44, 0.100);
     height: 100%;
     animation: fadeIn 1s;
     max-width: 1140px;
@@ -172,7 +195,7 @@ h3 {
     padding: 20px;
     padding-top: 7%;
     animation: fadeIn 1s;
-    color: rgba(44, 44, 44, 1)
+    color: rgba(255, 255, 255, 1)
 }
 
 h2 {
@@ -211,6 +234,7 @@ h2 {
 .text {
     max-width: 50%;
     padding: 0 20px;
+    padding-top: 2%;
 }
 
 .text p {
@@ -234,7 +258,7 @@ h2 {
   height: 100%;
   animation: opa 1s;
 }
-
+  
 .text-finish{
   font-size: 60px;
   margin-top: 5%;
@@ -248,9 +272,10 @@ h2 {
 }
 
 .credit-div{
-  margin-top: 8%;
-  background-color: rgba(131, 118, 118, 0.548);
-  margin-bottom: 0px;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  background-color: rgba(198, 149, 98, 0.588);
 }
 
 .credit{
@@ -274,8 +299,8 @@ h2 {
 
 #reset{
   margin-top: 5%;
-  background-color: rgb(208, 209, 255);
-  width: 20%;
+  background-color: rgba(215, 136, 54, 0.851);
+  width: 15%;
   margin-left: 40%;
   font-size: 35px;
   border-radius: 10px;

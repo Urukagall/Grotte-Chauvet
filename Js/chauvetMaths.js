@@ -9,7 +9,7 @@ export async function rotation(pointA, pointB) {
 }
 
 //------------------------------------------------------------------------------
-export async function InitVector(pointList) {
+export async function InitVector(pointList, pointPosition, listVector) {
     const childrenList = await pointList[0].getChildren();
     const sizeChildrenList = childrenList.length;
   
@@ -30,12 +30,12 @@ export async function InitVector(pointList) {
   
       pointA = trueChildrenList[i].getGlobalTransform().position;
       pointB = trueChildrenList[i+1].getGlobalTransform().position;
-      await Vector(pointA, pointB);
+      await Vector(pointA, pointB, listVector);
     }
 }
 
 //------------------------------------------------------------------------------
-export async function Vector(a , b) {
+export async function Vector(a , b, listVector) {
     const vect = [0,0,0];
     const norm = Math.sqrt( ((b[0]-a[0])**2) + ((b[1]-a[1])**2) + ((b[2]-a[2])**2))
     vect[0] = (b[0] - a[0]) / norm;

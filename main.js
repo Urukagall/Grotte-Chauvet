@@ -52,6 +52,9 @@ let numberFire = 0;
 let mainSceneLoadedResolve;
 let mainSceneLoadedPromise = new Promise(resolve => { mainSceneLoadedResolve = resolve; });
 
+
+export {stepScientist, stepAudio, rootCurrentCharacter,scientistTalk, pointPosition, audioList};
+
 //------------------------------------------------------------------------------
 async function InitApp(canvas) {
   // hide canvas until main assets are loaded
@@ -97,7 +100,7 @@ async function InitApp(canvas) {
   document.getElementById("choice1").addEventListener("click", function() {
     document.getElementById("home").style.display = "none";
     ChangeCharacter("scientist");
-    document.getElementById("chrono").style.display = "block";
+
      startStopwatch(2 * 60 + 30);
     //startStopwatch(10);
   });
@@ -105,7 +108,7 @@ async function InitApp(canvas) {
   document.getElementById("choice2").addEventListener("click", function() {
     document.getElementById("home").style.display = "none";
     ChangeCharacter("caveman");
-    document.getElementById("chrono").style.display = "block";
+
     startStopwatch(2 * 60 + 30);
   });
 
@@ -118,7 +121,7 @@ async function InitApp(canvas) {
 
   canvas.style.display = "block";
 
-  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, currentCharacter, rootCurrentCharacter));
+  window.addEventListener("keydown", (event) => checkKeyPressed(event, fresques, currentCharacter,rootCurrentCharacter));
   canvas.addEventListener('mousedown', () => setFPSCameraController(canvas));
   SDK3DVerse.notifier.on('onFramePostRender', () => update(rootCurrentCharacter, canvas));
 }
@@ -204,6 +207,18 @@ async function ResetAnime(rootScientist) {
   rootScientist[0].setComponent("animation_controller", scientistAnime);
 }
 
+export async function setStepScientist(step) {
+  stepScientist = step;
+}
+
+export async function setStepAudio(step) {
+  stepAudio = step;
+}
+
+export async function setScientistTalk(bool) {
+  scientistTalk = bool;
+}
+
 //------------------------------------------------------------------------------
 async function ChangeCharacter(character) {
   const rootScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('94202d5a-c9f9-4f05-bcab-2fc64ef560b0');
@@ -217,19 +232,19 @@ async function ChangeCharacter(character) {
   
   const midCollision = await SDK3DVerse.engineAPI.findEntitiesByEUID('ddabc7d2-e6ac-402f-b6e8-b4fdc50ed719');
 
-  const panneau1 = await SDK3DVerse.engineAPI.findEntitiesByEUID('238add87-5d43-482b-8554-6e9d776064d6');
-  const panneau2 = await SDK3DVerse.engineAPI.findEntitiesByEUID('95c473b0-f684-48ab-96bd-7c4f2ee7ec87');
-  const panneau3 = await SDK3DVerse.engineAPI.findEntitiesByEUID('97ef8d38-a950-4bec-bc70-a2a62bfb536d');
-  const panneau4 = await SDK3DVerse.engineAPI.findEntitiesByEUID('ee0be6e1-2ab0-4e63-93e2-bb364d3611ab');
+  const panneau1 = await SDK3DVerse.engineAPI.findEntitiesByEUID('d33efefe-d949-4dbb-b9a5-1a1b5d173927');//bison
+  const panneau2 = await SDK3DVerse.engineAPI.findEntitiesByEUID('aab72482-c83b-4904-bddd-752a90e2af22');//rhino
+  const panneau3 = await SDK3DVerse.engineAPI.findEntitiesByEUID('00f35d2b-7382-45a4-b7cc-c322ff904b29');//lion
+  const panneau4 = await SDK3DVerse.engineAPI.findEntitiesByEUID('8ce30aea-1df7-44b9-b4d3-5a19199e1ccb');//fresque
 
   const pointListCaveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('06e8ba40-27d4-4018-8bcd-ef1a122ee407');
-  const pointListScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('eb4d7ab6-113d-4148-b2d1-43ddbc056291');
+  const pointListScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('db89ed9c-eb11-4974-8aae-d062753269ae');
   const listFire = await SDK3DVerse.engineAPI.findEntitiesByEUID('db89ed9c-eb11-4974-8aae-d062753269ae');
   const listLed = await SDK3DVerse.engineAPI.findEntitiesByEUID('67abe046-cf07-4f66-9a22-7c671702571c');
   const player = await SDK3DVerse.engineAPI.findEntitiesByEUID('2252d8f2-d48f-4210-99f9-069968904a45');
 
   if(character == "caveman"){
-    InitVector(pointListCaveMan);
+    InitVector(pointListCaveMan, pointPosition, listVector);
 
 
     listFire[0].setGlobalTransform({
@@ -275,7 +290,7 @@ async function ChangeCharacter(character) {
     });
   }
   else {
-    InitVector(pointListScientist);
+    InitVector(pointListScientist, pointPosition, listVector);
 
     listFire[0].setGlobalTransform({
       position : [0, 100, 0]
@@ -326,6 +341,8 @@ async function startStopwatch(duration) {
   const cameraDataJSON = camera.getComponent('camera').dataJSON;
   var intensPlus = 1/5;
   var intens = 0;
+  document.getElementById("chrono").style.display = "block";
+  document.getElementById("tuto").style.display = "block";
   setInterval(function () {
       minutes = parseInt(timer / 60, 10);
       seconds = parseInt(timer % 60, 10);
