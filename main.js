@@ -101,7 +101,7 @@ async function InitApp(canvas) {
     document.getElementById("home").style.display = "none";
     ChangeCharacter("scientist");
 
-     startStopwatch(2 * 60 + 30);
+     startStopwatch(2);
     //startStopwatch(10);
   });
 
