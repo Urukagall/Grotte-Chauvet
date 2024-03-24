@@ -15,10 +15,8 @@ export async function InitFresque(fresques) {
 //------------------------------------------------------------------------------
 export let nameFresque = "";
 export async function TextFresque(fresque, character) {
-  console.log(fresque.components.debug_name.value);
   
   const name = fresque.components.debug_name.value;
-  console.log(name);
   
   const titleElement = document.querySelector('#text-fresque h2');
   const linkElement = document.querySelector('.text p');

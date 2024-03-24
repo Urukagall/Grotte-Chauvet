@@ -42,27 +42,22 @@ export async function detectionFresque(fresques, currentCharacter) {
       const childrenFresque = await fresque.getChildren();
       if(currentCharacter[0].components.debug_name.value == "caveman") {
         if(childrenFresque[1].components.debug_name.value == "fresque") {
-          console.log("fresque 1");
           posFresque = await childrenFresque[1].getGlobalTransform().position;
         }
         else {
           posFresque = await childrenFresque[0].getGlobalTransform().position;
-          console.log("fresque 1");
         }
       }
       else {
         if(childrenFresque[1].components.debug_name.value == "fresque") {
           posFresque = await childrenFresque[0].getGlobalTransform().position;
-          console.log("fresque 2");
         }
         else {
           posFresque = await childrenFresque[1].getGlobalTransform().position;
-          console.log("fresque 2");
         }
       }
 
       const dist = Math.sqrt( ((posFresque[0] - posUser[0]) **2 ) + ((posFresque[1] - posUser[1]) **2) + ((posFresque[2] - posUser[2]) **2));
-      console.log(dist);
 
       if( dist < 4 && dist < distFresque) {
         distFresque = dist;
@@ -75,39 +70,41 @@ export async function detectionFresque(fresques, currentCharacter) {
 
 //------------------------------------------------------------------------------
 export async function detectionGuide(scientist, rootScientist) {
-    const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
-    const posUser = await user[0].getTransform().position;
-    let step = [0,0];
-  
-    if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15) {
-      const scientistPosition = scientist[0].getGlobalTransform().position;
-      const scientistTransform = rootScientist[0].getGlobalTransform();
-      const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
-  
-      if(dist<2) {
-        if(!scientistTalk && stepScientist>=0) {
-          const audio = audioList[stepAudio];
-          document.getElementById(audio).play();
-          setScientistTalk(true);
+  const user = await SDK3DVerse.engineAPI.cameraAPI.getActiveViewports();
+  const posUser = await user[0].getTransform().position;
+  let step = [0,0];
+
+
+  if(stepScientist ==-1 || stepScientist ==3 || stepScientist ==7 || stepScientist ==14 || stepScientist ==15) {
+    const scientistPosition = scientist[0].getGlobalTransform().position;
+    const scientistTransform = rootScientist[0].getGlobalTransform();
+    const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
+
+    if(dist<2) {
+
+      if(!scientistTalk && stepScientist>=0) {
+        const audio = audioList[stepAudio];
+        document.getElementById(audio).play();
+        setScientistTalk(true);
+      }
+      else {
+        if(stepScientist!=0 && scientistTalk) {
+          document.getElementById(audioList[stepAudio]).pause();
+          document.getElementById(audioList[stepAudio]).currentTime = 0;
+          setStepAudio(stepAudio + 1);
+          // stepAudio += 1;
         }
-        else {
-          if(stepScientist!=0 && scientistTalk) {
-            document.getElementById(audioList[stepAudio]).pause();
-            document.getElementById(audioList[stepAudio]).currentTime = 0;
-            setStepAudio(stepAudio + 1);
-            // stepAudio += 1;
-          }
-          setStepScientist(stepScientist + 1);
-          // stepScientist += 1 ;
-  
-          setScientistTalk(false);
-          scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
-          rootScientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
-        }
+        setStepScientist(stepScientist + 1);
+        // stepScientist += 1 ;
+
+        setScientistTalk(false);
+        scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
+        rootScientist[0].setGlobalTransform({ eulerOrientation : scientistTransform.eulerOrientation});
       }
     }
-    return step;
   }
+  return step;
+}
 
 //------------------------------------------------------------------------------
 export async function InitFirstPersonController(charCtlSceneUUID) {

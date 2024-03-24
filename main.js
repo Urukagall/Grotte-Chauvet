@@ -238,7 +238,7 @@ async function ChangeCharacter(character) {
   const panneau4 = await SDK3DVerse.engineAPI.findEntitiesByEUID('8ce30aea-1df7-44b9-b4d3-5a19199e1ccb');//fresque
 
   const pointListCaveMan = await SDK3DVerse.engineAPI.findEntitiesByEUID('06e8ba40-27d4-4018-8bcd-ef1a122ee407');
-  const pointListScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('db89ed9c-eb11-4974-8aae-d062753269ae');
+  const pointListScientist = await SDK3DVerse.engineAPI.findEntitiesByEUID('eb4d7ab6-113d-4148-b2d1-43ddbc056291');
   const listFire = await SDK3DVerse.engineAPI.findEntitiesByEUID('db89ed9c-eb11-4974-8aae-d062753269ae');
   const listLed = await SDK3DVerse.engineAPI.findEntitiesByEUID('67abe046-cf07-4f66-9a22-7c671702571c');
   const player = await SDK3DVerse.engineAPI.findEntitiesByEUID('2252d8f2-d48f-4210-99f9-069968904a45');
@@ -350,8 +350,6 @@ async function startStopwatch(duration) {
       minutes = minutes < 10 ? "0" + minutes : minutes;
       seconds = seconds < 10 ? "0" + seconds : seconds;
       chronometerElement.textContent = minutes + ":" + seconds;
-      console.log(minutes + ":" + seconds);
-      console.log(timer);
       if(timer < 5){
         camera.setComponent('camera', { dataJSON: { ...cameraDataJSON, ambientIntensity: intensPlus + intens }});
         intens += intensPlus;
