@@ -80,7 +80,7 @@ export async function detectionGuide(scientist, rootScientist) {
     const scientistTransform = rootScientist[0].getGlobalTransform();
     const dist = Math.sqrt( ((scientistPosition[0] - posUser[0]) **2 ) + ((scientistPosition[1] - posUser[1]) **2) + ((scientistPosition[2] - posUser[2]) **2));
 
-    if(dist<2) {
+    if(dist<7) {
 
       if(!scientistTalk && stepScientist>=0) {
         const audio = audioList[stepAudio];
