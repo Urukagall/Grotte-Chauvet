@@ -92,10 +92,8 @@ export async function detectionGuide(scientist, rootScientist) {
           document.getElementById(audioList[stepAudio]).pause();
           document.getElementById(audioList[stepAudio]).currentTime = 0;
           setStepAudio(stepAudio + 1);
-          // stepAudio += 1;
         }
         setStepScientist(stepScientist + 1);
-        // stepScientist += 1 ;
 
         setScientistTalk(false);
         scientistTransform.eulerOrientation[1] = await rotation(pointPosition[stepScientist], pointPosition[stepScientist + 1]);
